@@ -45,6 +45,7 @@ mod tests {
     use crate::mutation_graph::plot_options::error::PlotOptionError;
     use crate::mutation_graph::plot_options::plot_option::PlotOption;
     use crate::mutation_graph::plot_options::PlotOptions;
+    use crate::mutation_graph::sha1_string::Sha1String;
     use std::collections::HashSet;
     use std::iter::FromIterator;
 
@@ -61,7 +62,7 @@ mod tests {
 
     #[test]
     fn test_plot_options_highlight_predecessors_of_one_node() {
-        let sha1_1 = String::from("1");
+        let sha1_1 = Sha1String::from("1");
         let options = PlotOptions::from(&[PlotOption::HighlightEdgesFromRootTo(sha1_1.clone())]);
         assert_eq!(
             options,
@@ -73,8 +74,8 @@ mod tests {
 
     #[test]
     fn test_plot_options_highlight_predecessors_of_multiple_nodes() {
-        let sha1_1 = String::from("1");
-        let sha1_2 = String::from("2");
+        let sha1_1 = Sha1String::from("1");
+        let sha1_2 = Sha1String::from("2");
         let options = PlotOptions::from(&[
             PlotOption::HighlightEdgesFromRootTo(sha1_1.clone()),
             PlotOption::HighlightEdgesFromRootTo(sha1_2.clone()),

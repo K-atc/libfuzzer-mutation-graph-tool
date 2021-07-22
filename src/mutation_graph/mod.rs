@@ -169,7 +169,7 @@ impl MutationGraph {
                 "\"{}\" -> \"{}\" [label=\"{}\", splines=\"curved\"{}];\n",
                 edge.parent, edge.child, edge.label, additional
             )
-            .map_err(MutationGraphError::FmtError)?;
+                .map_err(MutationGraphError::FmtError)?;
         }
         for weak_edge in self.weak_edge.values() {
             write!(
@@ -177,7 +177,7 @@ impl MutationGraph {
                 "\"{}\" -> \"{}\" [label=\"{}\", style=\"dashed\"];\n",
                 weak_edge.parent, weak_edge.child, weak_edge.label
             )
-            .map_err(MutationGraphError::FmtError)?;
+                .map_err(MutationGraphError::FmtError)?;
         }
         write!(&mut res, "}}\n").map_err(MutationGraphError::FmtError)?;
         Ok(res)
@@ -207,8 +207,8 @@ mod test {
 
     #[test]
     fn test_mutation_graph_node() {
-        let node_1_sha1 = String::from("node_1");
-        let no_such_node_sha1 = String::from("no_such_node");
+        let node_1_sha1 = Sha1String::from("node_1");
+        let no_such_node_sha1 = Sha1String::from("no_such_node");
 
         let mut graph = MutationGraph::new();
 
@@ -221,12 +221,12 @@ mod test {
 
     #[test]
     fn test_mutation_graph_edge() {
-        let node_1_sha1 = String::from("node_1");
-        let node_2_sha1 = String::from("node_2");
-        let node_3_sha1 = String::from("node_3");
-        let node_4_sha1 = String::from("node_4");
-        let node_5_sha1 = String::from("node_5");
-        let no_such_node_sha1 = String::from("no_such_node");
+        let node_1_sha1 = Sha1String::from("node_1");
+        let node_2_sha1 = Sha1String::from("node_2");
+        let node_3_sha1 = Sha1String::from("node_3");
+        let node_4_sha1 = Sha1String::from("node_4");
+        let node_5_sha1 = Sha1String::from("node_5");
+        let no_such_node_sha1 = Sha1String::from("no_such_node");
 
         let mut graph = MutationGraph::new();
         /*
@@ -276,9 +276,9 @@ mod test {
 
     #[test]
     fn test_mutation_graph_missing_explicit_node_decl() {
-        let node_1_sha1 = String::from("node_1");
-        let node_2_sha1 = String::from("node_2");
-        let node_3_sha1 = String::from("node_3");
+        let node_1_sha1 = Sha1String::from("node_1");
+        let node_2_sha1 = Sha1String::from("node_2");
+        let node_3_sha1 = Sha1String::from("node_3");
 
         let mut graph = MutationGraph::new();
         /*
@@ -307,9 +307,9 @@ mod test {
 
     #[test]
     fn test_mutation_graph_cycle_graph() {
-        let node_1_sha1 = String::from("node_1");
-        let node_2_sha1 = String::from("node_2");
-        let node_3_sha1 = String::from("node_3");
+        let node_1_sha1 = Sha1String::from("node_1");
+        let node_2_sha1 = Sha1String::from("node_2");
+        let node_3_sha1 = Sha1String::from("node_3");
 
         let mut graph = MutationGraph::new();
         /*
