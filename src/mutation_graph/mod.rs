@@ -13,9 +13,9 @@ use mutation_graph_node::MutationGraphNode;
 use result::Result;
 use sha1_string::Sha1String;
 
+use std::collections::hash_map::Values;
 use std::collections::{HashMap, HashSet};
 use std::fmt::Write;
-use std::collections::hash_map::Values;
 
 #[derive(Debug, Clone)]
 pub struct MutationGraph {
@@ -44,12 +44,14 @@ impl MutationGraph {
 
     pub fn add_node(&mut self, node: &MutationGraphNode) -> () {
         self.node.insert(node.sha1.clone(), node.clone());
+        self.children.insert(node.sha1.clone(), HashSet::new());
     }
 
     pub fn add_edge(&mut self, edge: &MutationGraphEdge) -> () {
         self.edge.insert(DirectedEdge::new(&edge), edge.clone());
 
         if self.children.get_mut(&edge.parent).is_none() {
+            // Fail safe
             self.children.insert(edge.parent.clone(), HashSet::new());
         }
         match self.children.get_mut(&edge.parent) {
@@ -64,20 +66,20 @@ impl MutationGraph {
         self.node.get(sha1)
     }
 
-    pub fn get_children(&self, parent: &Sha1String) -> Option<&HashSet<Sha1String>> {
+    pub fn children_of(&self, parent: &Sha1String) -> Option<&HashSet<Sha1String>> {
         self.children.get(parent)
     }
 
-    pub fn get_parent(&self, child: &Sha1String) -> Option<&Sha1String> {
+    pub fn parent_of(&self, child: &Sha1String) -> Option<&Sha1String> {
         self.parent.get(child)
     }
 
-    pub fn get_top<'a>(&'a self, node: &'a Sha1String) -> Result<&'a Sha1String> {
+    pub fn top_of<'a>(&'a self, node: &'a Sha1String) -> Result<&'a Sha1String> {
         if self.get_node(node).is_none() {
             return Err(MutationGraphError::NodeNotExists(node.clone()));
         }
-        match self.get_parent(node) {
-            Some(parent) => self.get_top(parent),
+        match self.parent_of(node) {
+            Some(parent) => self.top_of(parent),
             None => Ok(node),
         }
     }
@@ -86,7 +88,7 @@ impl MutationGraph {
         if self.get_node(node).is_none() {
             return Err(MutationGraphError::NodeNotExists(node.clone()));
         }
-        match self.get_parent(node) {
+        match self.parent_of(node) {
             Some(parent) => match self.predecessors_of(parent) {
                 Ok(mut res) => {
                     res.push(parent);
@@ -96,6 +98,14 @@ impl MutationGraph {
             },
             None => Ok(vec![]),
         }
+    }
+
+    pub fn leaves(&self) -> HashSet<&Sha1String> {
+        self.children
+            .iter()
+            .filter(|(_, v)| v.len() == 0)
+            .map(|(k, _)| k)
+            .collect()
     }
 
     fn _dot_graph(&self) -> std::result::Result<String, std::fmt::Error> {
@@ -128,6 +138,8 @@ mod test {
     use crate::mutation_graph::mutation_graph_node::MutationGraphNode;
     use crate::mutation_graph::sha1_string::Sha1String;
     use crate::mutation_graph::MutationGraph;
+    use std::collections::HashSet;
+    use std::iter::FromIterator;
 
     impl MutationGraphEdge {
         pub fn new(parent: &Sha1String, child: &Sha1String) -> Self {
@@ -182,14 +194,16 @@ mod test {
         graph.add_edge(&MutationGraphEdge::new(&node_3_sha1, &node_4_sha1));
         graph.add_edge(&MutationGraphEdge::new(&node_4_sha1, &node_5_sha1));
 
-        assert_eq!(graph.get_parent(&node_1_sha1), None);
-        assert_eq!(graph.get_parent(&node_2_sha1), Some(&node_1_sha1));
-        assert_eq!(graph.get_parent(&node_3_sha1), Some(&node_1_sha1));
+        println!("[*] graph = {:#?}", graph);
 
-        assert_eq!(graph.get_top(&node_1_sha1), Ok(&node_1_sha1));
-        assert_eq!(graph.get_top(&node_4_sha1), Ok(&node_1_sha1));
+        assert_eq!(graph.parent_of(&node_1_sha1), None);
+        assert_eq!(graph.parent_of(&node_2_sha1), Some(&node_1_sha1));
+        assert_eq!(graph.parent_of(&node_3_sha1), Some(&node_1_sha1));
+
+        assert_eq!(graph.top_of(&node_1_sha1), Ok(&node_1_sha1));
+        assert_eq!(graph.top_of(&node_4_sha1), Ok(&node_1_sha1));
         assert_eq!(
-            graph.get_top(&no_such_node_sha1),
+            graph.top_of(&no_such_node_sha1),
             Err(MutationGraphError::NodeNotExists(no_such_node_sha1.clone()))
         );
 
@@ -197,5 +211,7 @@ mod test {
             graph.predecessors_of(&node_5_sha1),
             Ok(vec![&node_1_sha1, &node_3_sha1, &node_4_sha1])
         );
+
+        assert_eq!(graph.leaves(), HashSet::from_iter(vec![&node_2_sha1, &node_5_sha1]))
     }
 }
