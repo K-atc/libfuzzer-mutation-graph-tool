@@ -7,7 +7,9 @@ use clap::{App, Arg, SubCommand};
 extern crate regex;
 
 use crate::mutation_graph::mutation_graph_node::MutationGraphNode;
-use crate::mutation_graph::perser::parse_mutation_graph_file;
+use crate::mutation_graph::parser::parse_mutation_graph_file;
+use crate::mutation_graph::plot_options::plot_option::PlotOption;
+use crate::mutation_graph::plot_options::PlotOptions;
 use crate::mutation_graph::sha1_string::Sha1String;
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
@@ -38,10 +40,14 @@ fn main() {
                         .help("SHA1 (a node name; i.e. seed file name)")
                         .required(true)
                         .index(1),
-                ),
+                )
         )
         .subcommand(SubCommand::with_name("plot").about(
             "Plot mutation graph file and save as PNG, SVG.\nThis command requires graphviz.",
+        ).arg(
+            Arg::with_name("SHA1")
+                .help("Highlight edges from root to SHA1")
+                .index(1),
         ))
         .get_matches();
 
@@ -101,8 +107,15 @@ fn main() {
                 eprintln!("[!] Failed to get predecessors of {}: {:?}", node, why)
             }
         }
-    } else if let Some(_matches) = matches.subcommand_matches("plot") {
-        let dot_graph_text = graph.dot_graph().expect("Failed to generate dot file");
+    } else if let Some(matches) = matches.subcommand_matches("plot") {
+        let plot_options = match matches.value_of("SHA1") {
+            Some(v) => vec![PlotOption::HighlightEdgesFromRootTo(Sha1String::from(v))],
+            None => vec![],
+        };
+
+        let dot_graph_text = graph
+            .dot_graph(PlotOptions::from(plot_options.as_slice()).unwrap())
+            .expect("Failed to generate dot file");
 
         plot_dot_graph(&dot_graph_text, "png", &mutation_graph_file);
         plot_dot_graph(&dot_graph_text, "svg", &mutation_graph_file);

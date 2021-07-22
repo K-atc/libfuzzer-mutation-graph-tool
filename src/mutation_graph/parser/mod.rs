@@ -8,7 +8,7 @@ pub mod result;
 
 use crate::mutation_graph::mutation_graph_edge::MutationGraphEdge;
 use crate::mutation_graph::mutation_graph_node::MutationGraphNode;
-use crate::mutation_graph::perser::error::ParseError;
+use crate::mutation_graph::parser::error::ParseError;
 use regex::Regex;
 use result::Result;
 

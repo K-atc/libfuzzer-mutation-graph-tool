@@ -2,21 +2,23 @@ pub mod directed_edge;
 pub mod error;
 pub mod mutation_graph_edge;
 pub mod mutation_graph_node;
-pub mod perser;
+pub mod parser;
+pub mod plot_options;
 pub mod result;
 pub mod sha1_string;
-
-use directed_edge::DirectedEdge;
-use error::MutationGraphError;
-use mutation_graph_edge::MutationGraphEdge;
-use mutation_graph_node::MutationGraphNode;
-use result::Result;
-use sha1_string::Sha1String;
 
 use std::collections::hash_map::Values;
 use std::collections::{HashMap, HashSet};
 use std::fmt::Write;
 use std::iter::FromIterator;
+
+use directed_edge::DirectedEdge;
+use error::MutationGraphError;
+use mutation_graph_edge::MutationGraphEdge;
+use mutation_graph_node::MutationGraphNode;
+use plot_options::PlotOptions;
+use result::Result;
+use sha1_string::Sha1String;
 
 #[derive(Debug, Clone)]
 pub struct MutationGraph {
@@ -137,46 +139,61 @@ impl MutationGraph {
             .collect()
     }
 
-    // Helper function
-    fn _dot_graph(&self) -> std::result::Result<String, std::fmt::Error> {
+    // Dumps self to dot graph
+    pub fn dot_graph(&self, plot_options: PlotOptions) -> Result<String> {
+        let predecessors = match plot_options.highlight_edges_from_root_to {
+            Some(ref node) => self.predecessors_of(node)?,
+            None => vec![],
+        };
+
         let mut res = String::new();
-        write!(&mut res, "digraph {{\n")?;
+        write!(&mut res, "digraph {{\n").map_err(MutationGraphError::FmtError)?;
         for node in self.node.values() {
-            write!(&mut res, "\"{}\"\n", node.sha1)?;
+            let mut additional = String::new();
+            if let Some(ref target) = plot_options.highlight_edges_from_root_to {
+                if &node.sha1 == target {
+                    write!(&mut additional, "color=\"red\"").map_err(MutationGraphError::FmtError)?;
+                }
+            }
+            write!(&mut res, "\"{}\" [{}]\n", node.sha1, additional).map_err(MutationGraphError::FmtError)?;
         }
         for edge in self.edge.values() {
+            let mut additional = String::new();
+            if let Some(ref target) = plot_options.highlight_edges_from_root_to {
+                if predecessors.contains(&&edge.parent) && (predecessors.contains(&&edge.child) || target == &edge.child) {
+                    write!(&mut additional, ", color=\"red\"").map_err(MutationGraphError::FmtError)?;
+                }
+            }
             write!(
                 &mut res,
-                "\"{}\" -> \"{}\" [label=\"{}\", splines=\"curved\"];\n",
-                edge.parent, edge.child, edge.label
-            )?;
+                "\"{}\" -> \"{}\" [label=\"{}\", splines=\"curved\"{}];\n",
+                edge.parent, edge.child, edge.label, additional
+            )
+            .map_err(MutationGraphError::FmtError)?;
         }
         for weak_edge in self.weak_edge.values() {
             write!(
                 &mut res,
                 "\"{}\" -> \"{}\" [label=\"{}\", style=\"dashed\"];\n",
                 weak_edge.parent, weak_edge.child, weak_edge.label
-            )?;
+            )
+            .map_err(MutationGraphError::FmtError)?;
         }
-        write!(&mut res, "}}\n")?;
+        write!(&mut res, "}}\n").map_err(MutationGraphError::FmtError)?;
         Ok(res)
-    }
-
-    // Dumps self to dot graph
-    pub fn dot_graph(&self) -> Result<String> {
-        self._dot_graph().map_err(MutationGraphError::FmtError)
     }
 }
 
 #[cfg(test)]
 mod test {
+    use std::collections::HashSet;
+    use std::iter::FromIterator;
+
     use crate::mutation_graph::error::MutationGraphError;
     use crate::mutation_graph::mutation_graph_edge::MutationGraphEdge;
     use crate::mutation_graph::mutation_graph_node::MutationGraphNode;
     use crate::mutation_graph::sha1_string::Sha1String;
     use crate::mutation_graph::MutationGraph;
-    use std::collections::HashSet;
-    use std::iter::FromIterator;
 
     impl MutationGraphEdge {
         pub fn new(parent: &Sha1String, child: &Sha1String) -> Self {
