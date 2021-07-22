@@ -14,11 +14,11 @@ fn main() {
         App::new("libfuzzer-mutation-graph-tool")
             .version("1.0")
             .author("Nao Tomori (@K_atc)")
-            .about("A Tool to interact wth libfuzzer's mutation graph file")
-            .subcommand(SubCommand::with_name("parse").about("Just parse mutation graph file"))
+            .about("A Tool to interact wth libfuzzer's mutation graph file.")
+            .subcommand(SubCommand::with_name("parse").about("Just parse mutation graph file."))
             .subcommand(
                 SubCommand::with_name("pred")
-                    .about("List predecessor of given node")
+                    .about("List predecessor of given node.")
                     .arg(
                         Arg::with_name("SHA1")
                             .help("SHA1 (a node name; i.e. seed file name)")
@@ -27,11 +27,11 @@ fn main() {
                     ),
             )
             .subcommand(SubCommand::with_name("plot").about(
-                "Plot mutation graph file and save as PNG, SVG. This command requires graphviz",
+                "Plot mutation graph file and save as PNG, SVG.\nThis command requires graphviz.",
             ))
             .arg(
                 Arg::with_name("FILE")
-                    .help("A mutation graph file")
+                    .help("A mutation graph file.")
                     .required(true)
                     .index(1),
             )
