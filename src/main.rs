@@ -29,6 +29,7 @@ fn main() {
         .subcommand(SubCommand::with_name("parse").about("Just parse mutation graph file."))
         .subcommand(SubCommand::with_name("ls").about("List nodes."))
         .subcommand(SubCommand::with_name("leaves").about("List leaf nodes."))
+        .subcommand(SubCommand::with_name("roots").about("List root nodes."))
         .subcommand(
             SubCommand::with_name("pred")
                 .about("List predecessor of given node.")
@@ -67,6 +68,13 @@ fn main() {
         }
     } else if let Some(_matches) = matches.subcommand_matches("leaves") {
         let leaves = graph.leaves();
+        let heap: BinaryHeap<Reverse<&&Sha1String>> =
+            leaves.iter().map(|v| Reverse(v)).collect();
+        for name in heap.into_iter_sorted() {
+            println!("{}", name.0)
+        }
+    } else if let Some(_matches) = matches.subcommand_matches("roots") {
+        let leaves = graph.roots();
         let heap: BinaryHeap<Reverse<&&Sha1String>> =
             leaves.iter().map(|v| Reverse(v)).collect();
         for name in heap.into_iter_sorted() {
