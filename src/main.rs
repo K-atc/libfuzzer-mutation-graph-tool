@@ -8,12 +8,12 @@ extern crate regex;
 
 use crate::mutation_graph::mutation_graph_node::MutationGraphNode;
 use crate::mutation_graph::perser::parse_mutation_graph_file;
+use crate::mutation_graph::sha1_string::Sha1String;
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
 use std::io::Write;
 use std::path::Path;
 use std::process::{Command, Stdio};
-use crate::mutation_graph::sha1_string::Sha1String;
 
 fn main() {
     let matches = App::new("libfuzzer-mutation-graph-tool")
@@ -68,15 +68,13 @@ fn main() {
         }
     } else if let Some(_matches) = matches.subcommand_matches("leaves") {
         let leaves = graph.leaves();
-        let heap: BinaryHeap<Reverse<&&Sha1String>> =
-            leaves.iter().map(|v| Reverse(v)).collect();
+        let heap: BinaryHeap<Reverse<&&Sha1String>> = leaves.iter().map(|v| Reverse(v)).collect();
         for name in heap.into_iter_sorted() {
             println!("{}", name.0)
         }
     } else if let Some(_matches) = matches.subcommand_matches("roots") {
         let leaves = graph.roots();
-        let heap: BinaryHeap<Reverse<&&Sha1String>> =
-            leaves.iter().map(|v| Reverse(v)).collect();
+        let heap: BinaryHeap<Reverse<&&Sha1String>> = leaves.iter().map(|v| Reverse(v)).collect();
         for name in heap.into_iter_sorted() {
             println!("{}", name.0)
         }

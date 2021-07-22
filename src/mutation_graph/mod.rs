@@ -16,12 +16,14 @@ use sha1_string::Sha1String;
 use std::collections::hash_map::Values;
 use std::collections::{HashMap, HashSet};
 use std::fmt::Write;
+use std::iter::FromIterator;
 
 #[derive(Debug, Clone)]
 pub struct MutationGraph {
     // Stores real data
     node: HashMap<Sha1String, MutationGraphNode>,
     edge: HashMap<DirectedEdge, MutationGraphEdge>,
+    weak_edge: HashMap<DirectedEdge, MutationGraphEdge>,
 
     // Indexes to search nodes
     children: HashMap<Sha1String, HashSet<Sha1String>>,
@@ -33,6 +35,7 @@ impl MutationGraph {
         Self {
             node: HashMap::new(),
             edge: HashMap::new(),
+            weak_edge: HashMap::new(),
             children: HashMap::new(),
             parent: HashMap::new(),
         }
@@ -56,18 +59,29 @@ impl MutationGraph {
             self.add_node(&MutationGraphNode::new(&edge.child))
         }
 
-        self.edge.insert(DirectedEdge::new(&edge), edge.clone());
+        // Insert edge and update indexes avoiding making closed chains
+        if self.root_of(&edge.parent) != self.root_of(&edge.child) {
+            self.edge.insert(DirectedEdge::new(&edge), edge.clone());
 
-        if self.children.get_mut(&edge.parent).is_none() {
-            // Fail safe
-            self.children.insert(edge.parent.clone(), HashSet::new());
+            match self.children.get_mut(&edge.parent) {
+                Some(key) => {
+                    key.insert(edge.child.clone());
+                    ()
+                }
+                None => {
+                    self.children.insert(
+                        edge.parent.clone(),
+                        HashSet::from_iter([edge.child.clone()].iter().cloned()),
+                    );
+                    ()
+                }
+            };
+
+            self.parent.insert(edge.child.clone(), edge.parent.clone());
+        } else {
+            self.weak_edge
+                .insert(DirectedEdge::new(&edge), edge.clone());
         }
-        match self.children.get_mut(&edge.parent) {
-            Some(key) => key.insert(edge.child.clone()),
-            None => unreachable!(),
-        };
-
-        self.parent.insert(edge.child.clone(), edge.parent.clone());
     }
 
     pub fn get_node(&self, sha1: &Sha1String) -> Option<&MutationGraphNode> {
@@ -117,11 +131,13 @@ impl MutationGraph {
     }
 
     pub fn roots(&self) -> HashSet<&Sha1String> {
-        self.node.keys()
+        self.node
+            .keys()
             .filter(|v| self.parent_of(v).is_none())
             .collect()
     }
 
+    // Helper function
     fn _dot_graph(&self) -> std::result::Result<String, std::fmt::Error> {
         let mut res = String::new();
         write!(&mut res, "digraph {{\n")?;
@@ -131,8 +147,15 @@ impl MutationGraph {
         for edge in self.edge.values() {
             write!(
                 &mut res,
-                "\"{}\" -> \"{}\" [label=\"{}\"];\n",
+                "\"{}\" -> \"{}\" [label=\"{}\", splines=\"curved\"];\n",
                 edge.parent, edge.child, edge.label
+            )?;
+        }
+        for weak_edge in self.weak_edge.values() {
+            write!(
+                &mut res,
+                "\"{}\" -> \"{}\" [label=\"{}\", style=\"dashed\"];\n",
+                weak_edge.parent, weak_edge.child, weak_edge.label
             )?;
         }
         write!(&mut res, "}}\n")?;
@@ -226,7 +249,10 @@ mod test {
             Ok(vec![&node_1_sha1, &node_3_sha1, &node_4_sha1])
         );
 
-        assert_eq!(graph.leaves(), HashSet::from_iter(vec![&node_2_sha1, &node_5_sha1]));
+        assert_eq!(
+            graph.leaves(),
+            HashSet::from_iter(vec![&node_2_sha1, &node_5_sha1])
+        );
 
         assert_eq!(graph.roots(), HashSet::from_iter(vec![&node_1_sha1]));
     }
@@ -247,11 +273,36 @@ mod test {
         graph.add_edge(&MutationGraphEdge::new(&node_1_sha1, &node_3_sha1));
 
         assert_eq!(
-            graph.nodes().map(|v| &v.sha1).collect::<HashSet<&Sha1String>>(),
+            graph
+                .nodes()
+                .map(|v| &v.sha1)
+                .collect::<HashSet<&Sha1String>>(),
             HashSet::from_iter([&node_1_sha1, &node_2_sha1, &node_3_sha1])
         );
 
-        assert_eq!(graph.leaves(), HashSet::from_iter(vec![&node_2_sha1, &node_3_sha1]));
+        assert_eq!(
+            graph.leaves(),
+            HashSet::from_iter(vec![&node_2_sha1, &node_3_sha1])
+        );
+
+        assert_eq!(graph.roots(), HashSet::from_iter(vec![&node_1_sha1]));
+    }
+
+    #[test]
+    fn test_mutation_graph_cycle_graph() {
+        let node_1_sha1 = String::from("node_1");
+        let node_2_sha1 = String::from("node_2");
+        let node_3_sha1 = String::from("node_3");
+
+        let mut graph = MutationGraph::new();
+        /*
+           (1)
+           / \
+         (2)-(3)
+        */
+        graph.add_edge(&MutationGraphEdge::new(&node_1_sha1, &node_2_sha1));
+        graph.add_edge(&MutationGraphEdge::new(&node_2_sha1, &node_3_sha1));
+        graph.add_edge(&MutationGraphEdge::new(&node_3_sha1, &node_1_sha1));
 
         assert_eq!(graph.roots(), HashSet::from_iter(vec![&node_1_sha1]));
     }
