@@ -13,6 +13,7 @@ use std::collections::BinaryHeap;
 use std::io::Write;
 use std::path::Path;
 use std::process::{Command, Stdio};
+use crate::mutation_graph::sha1_string::Sha1String;
 
 fn main() {
     let matches = App::new("libfuzzer-mutation-graph-tool")
@@ -65,8 +66,11 @@ fn main() {
             println!("{}", node.0.sha1)
         }
     } else if let Some(_matches) = matches.subcommand_matches("leaves") {
-        for name in graph.leaves().iter() {
-            println!("{}", name)
+        let leaves = graph.leaves();
+        let heap: BinaryHeap<Reverse<&&Sha1String>> =
+            leaves.iter().map(|v| Reverse(v)).collect();
+        for name in heap.into_iter_sorted() {
+            println!("{}", name.0)
         }
     } else if let Some(matches) = matches.subcommand_matches("pred") {
         let node = match matches.value_of("SHA1") {
