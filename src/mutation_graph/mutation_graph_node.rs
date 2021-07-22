@@ -1,4 +1,5 @@
 use super::sha1_string::Sha1String;
+use std::cmp::Ordering;
 
 #[derive(Debug, Clone, Hash)]
 pub struct MutationGraphNode {
@@ -12,6 +13,18 @@ impl PartialEq for MutationGraphNode {
 }
 
 impl Eq for MutationGraphNode {}
+
+impl Ord for MutationGraphNode {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.sha1.cmp(&other.sha1)
+    }
+}
+
+impl PartialOrd for MutationGraphNode {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
 
 impl MutationGraphNode {
     pub fn new(sha1: &Sha1String) -> Self {

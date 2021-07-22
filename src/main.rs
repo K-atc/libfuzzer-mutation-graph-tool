@@ -1,3 +1,5 @@
+#![feature(binary_heap_into_iter_sorted)]
+
 pub mod mutation_graph;
 
 extern crate clap;
@@ -8,14 +10,24 @@ use crate::mutation_graph::perser::parse_mutation_graph_file;
 use std::io::Write;
 use std::path::Path;
 use std::process::{Command, Stdio};
+use std::collections::BinaryHeap;
+use crate::mutation_graph::mutation_graph_node::MutationGraphNode;
+use std::cmp::Reverse;
 
 fn main() {
     let matches =
         App::new("libfuzzer-mutation-graph-tool")
             .version("1.0")
             .author("Nao Tomori (@K_atc)")
-            .about("A Tool to interact wth libfuzzer's mutation graph file.")
+            .about("A Tool to interact with libfuzzer's mutation graph file.")
+            .arg(
+                Arg::with_name("FILE")
+                    .help("A mutation graph file.")
+                    .required(true)
+                    .index(1),
+            )
             .subcommand(SubCommand::with_name("parse").about("Just parse mutation graph file."))
+            .subcommand(SubCommand::with_name("ls").about("List nodes."))
             .subcommand(
                 SubCommand::with_name("pred")
                     .about("List predecessor of given node.")
@@ -29,12 +41,6 @@ fn main() {
             .subcommand(SubCommand::with_name("plot").about(
                 "Plot mutation graph file and save as PNG, SVG.\nThis command requires graphviz.",
             ))
-            .arg(
-                Arg::with_name("FILE")
-                    .help("A mutation graph file.")
-                    .required(true)
-                    .index(1),
-            )
             .get_matches();
 
     let mutation_graph_file = Path::new(matches.value_of("FILE").unwrap());
@@ -52,6 +58,11 @@ fn main() {
 
     if let Some(_matches) = matches.subcommand_matches("parse") {
         println!("{:#?}", graph);
+    } else if let Some(_matches) = matches.subcommand_matches("ls") {
+        let heap: BinaryHeap<Reverse<&MutationGraphNode>> = graph.nodes().map(|v| Reverse(v)).collect();
+        for node in heap.into_iter_sorted() {
+            println!("{}", node.0.sha1)
+        }
     } else if let Some(matches) = matches.subcommand_matches("pred") {
         let node = match matches.value_of("SHA1") {
             Some(node) => node.to_string(),

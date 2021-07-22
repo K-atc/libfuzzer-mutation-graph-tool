@@ -15,6 +15,7 @@ use sha1_string::Sha1String;
 
 use std::collections::{HashMap, HashSet};
 use std::fmt::Write;
+use std::collections::hash_map::Values;
 
 #[derive(Debug, Clone)]
 pub struct MutationGraph {
@@ -35,6 +36,10 @@ impl MutationGraph {
             children: HashMap::new(),
             parent: HashMap::new(),
         }
+    }
+
+    pub fn nodes(&self) -> Values<Sha1String, MutationGraphNode> {
+        self.node.values()
     }
 
     pub fn add_node(&mut self, node: &MutationGraphNode) -> () {

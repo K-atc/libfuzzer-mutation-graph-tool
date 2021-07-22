@@ -19,7 +19,7 @@ Subcommands provides following functions.
 ```
 libfuzzer-mutation-graph-tool 1.0
 Nao Tomori (@K_atc)
-A Tool to interact wth libfuzzer's mutation graph file.
+A Tool to interact with libfuzzer's mutation graph file.
 
 USAGE:
     libfuzzer-mutation-graph-tool <FILE> [SUBCOMMAND]
@@ -42,7 +42,8 @@ SUBCOMMANDS:
 
 Requirements
 ----
-* Cargo & Rust
+* Cargo & Rust 
+    * Nightly required
 * (Optonal) Graphviz
     * To plot dot file
 
