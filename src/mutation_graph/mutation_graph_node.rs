@@ -14,9 +14,9 @@ impl PartialEq for MutationGraphNode {
 impl Eq for MutationGraphNode {}
 
 impl MutationGraphNode {
-    pub fn new(sha1: Sha1String) -> Self {
+    pub fn new(sha1: &Sha1String) -> Self {
         Self {
-            sha1,
+            sha1: sha1.clone(),
         }
     }
 }

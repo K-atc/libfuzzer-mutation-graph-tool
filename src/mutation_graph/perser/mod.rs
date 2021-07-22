@@ -37,7 +37,7 @@ pub fn parse_mutation_graph_file<T: AsRef<Path>>(file: T) -> Result<MutationGrap
             if let Some(m) = node.captures(&line) {
                 if m.len() == 2 {
                     match m.get(1) {
-                        Some(v) => graph.add_node(&MutationGraphNode::new(v.as_str().to_string())),
+                        Some(v) => graph.add_node(&MutationGraphNode::new(&v.as_str().to_string())),
                         None => return Err(ParseError::SyntaxError("Missing node value", m[0].to_string())),
                     }
                     continue
