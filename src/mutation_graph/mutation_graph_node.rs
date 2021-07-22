@@ -15,8 +15,6 @@ impl Eq for MutationGraphNode {}
 
 impl MutationGraphNode {
     pub fn new(sha1: &Sha1String) -> Self {
-        Self {
-            sha1: sha1.clone(),
-        }
+        Self { sha1: sha1.clone() }
     }
 }

@@ -1,7 +1,7 @@
 use super::sha1_string::Sha1String;
 
-use std::hash::{Hash, Hasher};
 use crate::mutation_graph::mutation_graph_edge::MutationGraphEdge;
+use std::hash::{Hash, Hasher};
 
 #[derive(Debug, Clone)]
 pub struct DirectedEdge {

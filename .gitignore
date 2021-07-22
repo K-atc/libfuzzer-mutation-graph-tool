@@ -1,2 +1,4 @@
 /target
 /.idea
+test/sample/mutation_graph_file/*.png
+test/sample/mutation_graph_file/*.svg
