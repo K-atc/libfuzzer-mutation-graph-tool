@@ -134,6 +134,7 @@ fn main() {
                                     _ => println!("\t{}", chunk)
                                 }
                             }
+                            println!()
                         }
                     } else {
                         for name in predecessors.iter() {
