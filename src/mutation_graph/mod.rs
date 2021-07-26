@@ -152,16 +152,21 @@ impl MutationGraph {
             let mut additional = String::new();
             if let Some(ref target) = plot_options.highlight_edges_from_root_to {
                 if &node.sha1 == target {
-                    write!(&mut additional, "color=\"red\"").map_err(MutationGraphError::FmtError)?;
+                    write!(&mut additional, "color=\"red\"")
+                        .map_err(MutationGraphError::FmtError)?;
                 }
             }
-            write!(&mut res, "\"{}\" [{}]\n", node.sha1, additional).map_err(MutationGraphError::FmtError)?;
+            write!(&mut res, "\"{}\" [{}]\n", node.sha1, additional)
+                .map_err(MutationGraphError::FmtError)?;
         }
         for edge in self.edge.values() {
             let mut additional = String::new();
             if let Some(ref target) = plot_options.highlight_edges_from_root_to {
-                if predecessors.contains(&&edge.parent) && (predecessors.contains(&&edge.child) || target == &edge.child) {
-                    write!(&mut additional, ", color=\"red\"").map_err(MutationGraphError::FmtError)?;
+                if predecessors.contains(&&edge.parent)
+                    && (predecessors.contains(&&edge.child) || target == &edge.child)
+                {
+                    write!(&mut additional, ", color=\"red\"")
+                        .map_err(MutationGraphError::FmtError)?;
                 }
             }
             write!(
@@ -169,7 +174,7 @@ impl MutationGraph {
                 "\"{}\" -> \"{}\" [label=\"{}\", splines=\"curved\"{}];\n",
                 edge.parent, edge.child, edge.label, additional
             )
-                .map_err(MutationGraphError::FmtError)?;
+            .map_err(MutationGraphError::FmtError)?;
         }
         for weak_edge in self.weak_edge.values() {
             write!(
@@ -177,7 +182,7 @@ impl MutationGraph {
                 "\"{}\" -> \"{}\" [label=\"{}\", style=\"dashed\"];\n",
                 weak_edge.parent, weak_edge.child, weak_edge.label
             )
-                .map_err(MutationGraphError::FmtError)?;
+            .map_err(MutationGraphError::FmtError)?;
         }
         write!(&mut res, "}}\n").map_err(MutationGraphError::FmtError)?;
         Ok(res)

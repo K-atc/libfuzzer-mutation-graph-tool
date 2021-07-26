@@ -2,20 +2,23 @@
 
 pub mod mutation_graph;
 
+extern crate binary_diff;
 extern crate clap;
-use clap::{App, Arg, SubCommand};
 extern crate regex;
+
+use clap::{App, Arg, SubCommand};
+use std::cmp::Reverse;
+use std::collections::BinaryHeap;
+use std::io::{Write, BufReader};
+use std::path::{Path};
+use std::process::{Command, Stdio};
 
 use crate::mutation_graph::mutation_graph_node::MutationGraphNode;
 use crate::mutation_graph::parser::parse_mutation_graph_file;
 use crate::mutation_graph::plot_options::plot_option::PlotOption;
 use crate::mutation_graph::plot_options::PlotOptions;
 use crate::mutation_graph::sha1_string::Sha1String;
-use std::cmp::Reverse;
-use std::collections::BinaryHeap;
-use std::io::Write;
-use std::path::Path;
-use std::process::{Command, Stdio};
+use binary_diff::{BinaryDiff, BinaryDiffChunk};
 
 fn main() {
     let matches = App::new("libfuzzer-mutation-graph-tool")
@@ -35,6 +38,12 @@ fn main() {
         .subcommand(
             SubCommand::with_name("pred")
                 .about("List predecessor of given node.")
+                .arg(
+                    Arg::with_name("SEEDS_DIR")
+                        .long("diff")
+                        .help("Diff seeds locate in SEEDS_DIR")
+                        .takes_value(true),
+                )
                 .arg(
                     Arg::with_name("SHA1")
                         .help("SHA1 (a node name; i.e. seed file name)")
@@ -96,11 +105,43 @@ fn main() {
         match graph.predecessors_of(&node) {
             Ok(predecessors) => {
                 if predecessors.len() > 0 {
-                    for name in predecessors.iter() {
-                        println!("{}", name)
+                    if let Some(seeds_dir_string) = matches.value_of("SEEDS_DIR") {
+                        let seeds_dir = Path::new(seeds_dir_string);
+                        let mut seeds: Vec<Sha1String> = predecessors
+                            .iter()
+                            .filter(|name| seeds_dir.join(&name).exists())
+                            .map(|v| Sha1String::from(v.clone()))
+                            .collect();
+                        seeds.push(node.clone());
+
+                        if seeds.len() < 2 {
+                            eprintln!("[!] None of predecessors of given SHA1 does not exist in given path: SHA1={}, SEEDS_DIR={}", &node, seeds_dir_string);
+                        }
+
+                        for (name_1, name_2) in seeds[0..seeds.len() - 1]
+                            .iter()
+                            .zip(seeds[1..seeds.len()].iter())
+                        {
+                            let file_1 = std::fs::File::open( seeds_dir.join(&name_1)).unwrap();
+                            let file_2 = std::fs::File::open( seeds_dir.join(&name_2)).unwrap();
+
+                            println!("{} -> {}", name_1, name_2);
+                            let diff_chunks =
+                                BinaryDiff::new(&mut BufReader::new(file_1), &mut BufReader::new(file_2)).unwrap();
+                            for chunk in diff_chunks.enhance().chunks() {
+                                match chunk {
+                                    BinaryDiffChunk::Same(_, _) => (), // Not print
+                                    _ => println!("\t{}", chunk)
+                                }
+                            }
+                        }
+                    } else {
+                        for name in predecessors.iter() {
+                            println!("{}", name);
+                        }
                     }
                 } else {
-                    eprintln!("[*] Given node does not have predecessors: sha1={}", node);
+                    eprintln!("[!] Given node does not have predecessors: sha1={}", node);
                 }
             }
             Err(why) => {
