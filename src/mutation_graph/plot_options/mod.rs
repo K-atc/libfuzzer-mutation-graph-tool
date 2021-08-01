@@ -9,10 +9,14 @@ pub mod result;
 use crate::mutation_graph::plot_options::error::PlotOptionError;
 use crate::mutation_graph::sha1_string::Sha1String;
 use result::Result;
+use crate::mutation_graph::mutation_graph_edge::MutationGraphEdge;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct PlotOptions {
     pub highlight_edges_from_root_to: Option<Sha1String>,
+    pub highlight_edge_with_blue: HashSet<MutationGraphEdge>,
+    pub highlight_edge_with_red: HashSet<MutationGraphEdge>,
+    pub highlight_edge_with_green: HashSet<MutationGraphEdge>,
 }
 
 impl PlotOptions {
@@ -24,7 +28,8 @@ impl PlotOptions {
                     match option {
                         PlotOption::HighlightEdgesFromRootTo(ref v) => {
                             nodes.insert(v.clone());
-                        } // _ => (),
+                        }
+                        _ => (),
                     }
                 }
                 match nodes.len() {
@@ -35,6 +40,43 @@ impl PlotOptions {
                         ))
                     }
                 }
+            },
+            highlight_edge_with_blue: {
+                let mut edges: HashSet<MutationGraphEdge> = HashSet::new();
+                for option in options.iter() {
+                    match option {
+                        PlotOption::HighlightEdgeWithBlue(ref v) => {
+                            edges.insert(v.clone());
+                        }
+                        _ => (),
+                    }
+                }
+                edges
+            },
+            // FIXME: Spaghetti code
+            highlight_edge_with_red: {
+                let mut edges: HashSet<MutationGraphEdge> = HashSet::new();
+                for option in options.iter() {
+                    match option {
+                        PlotOption::HighlightEdgeWithRed(ref v) => {
+                            edges.insert(v.clone());
+                        }
+                        _ => (),
+                    }
+                }
+                edges
+            },
+            highlight_edge_with_green: {
+                let mut edges: HashSet<MutationGraphEdge> = HashSet::new();
+                for option in options.iter() {
+                    match option {
+                        PlotOption::HighlightEdgeWithGreen(ref v) => {
+                            edges.insert(v.clone());
+                        }
+                        _ => (),
+                    }
+                }
+                edges
             },
         })
     }

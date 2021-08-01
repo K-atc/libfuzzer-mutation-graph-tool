@@ -91,8 +91,7 @@ MS: 1 ChangeBinInt-; base unit: c298122410da09836c59484e995c287294c31394
 We can observe how seeds which are predecessors of `c29812` were generated, using *libfuzzer-mutation-graph-tool*:
 
 ```
-$ cargo run -q test/sample/mutation_graph_file/fuzzer-test-suite-openssl-
-1.0.1f.dot pred c298122410da09836c59484e995c287294c31394 --diff test/sample/seeds/fuzzer-test-suite-openssl-1.0.1f/
+$ cargo run -q test/sample/mutation_graph_file/fuzzer-test-suite-openssl-1.0.1f.dot pred c298122410da09836c59484e995c287294c31394 --diff test/sample/seeds/fuzzer-test-suite-openssl-1.0.1f/
 adc83b19e793491b1c6ea0fd8b46cd9f32e592fc -> c5c050e132b1ee3a4f627b3b0350b77737f5f181
         Insert (offset=0x0, bytes=[2b])
         Insert (offset=0x1, bytes=[0e])

@@ -63,7 +63,7 @@ impl MutationGraph {
 
         // Insert edge and update indexes avoiding making closed chains
         if self.root_of(&edge.parent) != self.root_of(&edge.child) {
-            self.edge.insert(DirectedEdge::new(&edge), edge.clone());
+            self.edge.insert(DirectedEdge::from(&edge), edge.clone());
 
             match self.children.get_mut(&edge.parent) {
                 Some(key) => {
@@ -81,13 +81,21 @@ impl MutationGraph {
 
             self.parent.insert(edge.child.clone(), edge.parent.clone());
         } else {
-            self.weak_edge
-                .insert(DirectedEdge::new(&edge), edge.clone());
+            self.add_weak_edge(edge);
         }
+    }
+
+    pub fn add_weak_edge(&mut self, edge: &MutationGraphEdge) {
+        self.weak_edge
+            .insert(DirectedEdge::from(&edge), edge.clone());
     }
 
     pub fn get_node(&self, sha1: &Sha1String) -> Option<&MutationGraphNode> {
         self.node.get(sha1)
+    }
+
+    pub fn get_edge(&self, arrow: &DirectedEdge) -> Option<&MutationGraphEdge> {
+        self.edge.get(arrow)
     }
 
     pub fn children_of(&self, parent: &Sha1String) -> Option<&HashSet<Sha1String>> {
@@ -124,6 +132,15 @@ impl MutationGraph {
         }
     }
 
+    pub fn self_and_its_predecessors_of(&self, node: &Sha1String) -> Result<Vec<&Sha1String>> {
+        let mut res = self.predecessors_of(node)?;
+        match self.get_node(node) {
+            Some(node) => res.push(&node.sha1),
+            None => return Err(MutationGraphError::NodeNotExists(node.clone())),
+        }
+        Ok(res)
+    }
+
     pub fn leaves(&self) -> HashSet<&Sha1String> {
         self.children
             .iter()
@@ -147,7 +164,11 @@ impl MutationGraph {
         };
 
         let mut res = String::new();
+
+        // Start of dot file
         write!(&mut res, "digraph {{\n").map_err(MutationGraphError::FmtError)?;
+
+        // Declare nodes
         for node in self.node.values() {
             let mut additional = String::new();
             if let Some(ref target) = plot_options.highlight_edges_from_root_to {
@@ -159,6 +180,8 @@ impl MutationGraph {
             write!(&mut res, "\"{}\" [{}]\n", node.sha1, additional)
                 .map_err(MutationGraphError::FmtError)?;
         }
+
+        // Declare edges
         for edge in self.edge.values() {
             let mut additional = String::new();
             if let Some(ref target) = plot_options.highlight_edges_from_root_to {
@@ -168,7 +191,17 @@ impl MutationGraph {
                     write!(&mut additional, ", color=\"red\"")
                         .map_err(MutationGraphError::FmtError)?;
                 }
+            } else if plot_options.highlight_edge_with_blue.contains(edge) {
+                write!(&mut additional, ", color=\"blue\"")
+                    .map_err(MutationGraphError::FmtError)?;
+            } else if plot_options.highlight_edge_with_red.contains(edge) {
+                write!(&mut additional, ", color=\"red\"")
+                    .map_err(MutationGraphError::FmtError)?;
+            } else if plot_options.highlight_edge_with_green.contains(edge) {
+                write!(&mut additional, ", color=\"darkgreen\"")
+                    .map_err(MutationGraphError::FmtError)?;
             }
+
             write!(
                 &mut res,
                 "\"{}\" -> \"{}\" [label=\"{}\", splines=\"curved\"{}];\n",
@@ -177,14 +210,29 @@ impl MutationGraph {
             .map_err(MutationGraphError::FmtError)?;
         }
         for weak_edge in self.weak_edge.values() {
+            let mut additional = String::new();
+            if plot_options.highlight_edge_with_blue.contains(weak_edge) {
+                write!(&mut additional, ", color=\"blue\"")
+                    .map_err(MutationGraphError::FmtError)?;
+            } else if plot_options.highlight_edge_with_red.contains(weak_edge) {
+                write!(&mut additional, ", color=\"red\"")
+                    .map_err(MutationGraphError::FmtError)?;
+            } else if plot_options.highlight_edge_with_green.contains(weak_edge) {
+                write!(&mut additional, ", color=\"darkgreen\"")
+                    .map_err(MutationGraphError::FmtError)?;
+            }
+
             write!(
                 &mut res,
-                "\"{}\" -> \"{}\" [label=\"{}\", style=\"dashed\"];\n",
-                weak_edge.parent, weak_edge.child, weak_edge.label
+                "\"{}\" -> \"{}\" [label=\"{}\", style=\"dashed\"{}];\n",
+                weak_edge.parent, weak_edge.child, weak_edge.label, additional
             )
             .map_err(MutationGraphError::FmtError)?;
         }
+
+        // End of dot file
         write!(&mut res, "}}\n").map_err(MutationGraphError::FmtError)?;
+
         Ok(res)
     }
 }

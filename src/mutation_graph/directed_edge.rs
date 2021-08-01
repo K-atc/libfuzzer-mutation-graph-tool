@@ -25,7 +25,14 @@ impl PartialEq for DirectedEdge {
 impl Eq for DirectedEdge {}
 
 impl DirectedEdge {
-    pub fn new(edge: &MutationGraphEdge) -> Self {
+    pub fn new(parent: &Sha1String, child: &Sha1String) -> Self {
+        Self {
+            parent: parent.clone(),
+            child: child.clone(),
+        }
+    }
+
+    pub fn from(edge: &MutationGraphEdge) -> Self {
         Self {
             parent: edge.parent.clone(),
             child: edge.child.clone(),
