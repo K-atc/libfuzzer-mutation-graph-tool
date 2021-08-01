@@ -6,10 +6,10 @@ pub mod error;
 pub mod plot_option;
 pub mod result;
 
+use crate::mutation_graph::mutation_graph_edge::MutationGraphEdge;
 use crate::mutation_graph::plot_options::error::PlotOptionError;
 use crate::mutation_graph::sha1_string::Sha1String;
 use result::Result;
-use crate::mutation_graph::mutation_graph_edge::MutationGraphEdge;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct PlotOptions {

@@ -195,8 +195,7 @@ impl MutationGraph {
                 write!(&mut additional, ", color=\"blue\"")
                     .map_err(MutationGraphError::FmtError)?;
             } else if plot_options.highlight_edge_with_red.contains(edge) {
-                write!(&mut additional, ", color=\"red\"")
-                    .map_err(MutationGraphError::FmtError)?;
+                write!(&mut additional, ", color=\"red\"").map_err(MutationGraphError::FmtError)?;
             } else if plot_options.highlight_edge_with_green.contains(edge) {
                 write!(&mut additional, ", color=\"darkgreen\"")
                     .map_err(MutationGraphError::FmtError)?;
@@ -215,8 +214,7 @@ impl MutationGraph {
                 write!(&mut additional, ", color=\"blue\"")
                     .map_err(MutationGraphError::FmtError)?;
             } else if plot_options.highlight_edge_with_red.contains(weak_edge) {
-                write!(&mut additional, ", color=\"red\"")
-                    .map_err(MutationGraphError::FmtError)?;
+                write!(&mut additional, ", color=\"red\"").map_err(MutationGraphError::FmtError)?;
             } else if plot_options.highlight_edge_with_green.contains(weak_edge) {
                 write!(&mut additional, ", color=\"darkgreen\"")
                     .map_err(MutationGraphError::FmtError)?;
