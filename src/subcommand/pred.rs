@@ -1,0 +1,67 @@
+use crate::mutation_graph::sha1_string::Sha1String;
+use crate::mutation_graph::MutationGraph;
+use binary_diff::{BinaryDiff, BinaryDiffChunk};
+use clap::ArgMatches;
+use std::io::BufReader;
+use std::path::Path;
+
+pub(crate) fn pred(matches: &ArgMatches, graph: MutationGraph) {
+    let node = match matches.value_of("SHA1") {
+        Some(node) => node.to_string(),
+        None => {
+            eprintln!("[!] SHA1 is not specified");
+            return;
+        }
+    };
+
+    match graph.predecessors_of(&node) {
+        Ok(predecessors) => {
+            if predecessors.len() > 0 {
+                if let Some(seeds_dir_string) = matches.value_of("SEEDS_DIR") {
+                    let seeds_dir = Path::new(seeds_dir_string);
+                    let mut seeds: Vec<Sha1String> = predecessors
+                        .iter()
+                        .filter(|name| seeds_dir.join(&name).exists())
+                        .map(|v| Sha1String::from(v.clone()))
+                        .collect();
+                    seeds.push(node.clone());
+
+                    if seeds.len() < 2 {
+                        eprintln!("[!] None of predecessors of given SHA1 does not exist in given path: SHA1={}, SEEDS_DIR={}", &node, seeds_dir_string);
+                    }
+
+                    for (name_1, name_2) in seeds[0..seeds.len() - 1]
+                        .iter()
+                        .zip(seeds[1..seeds.len()].iter())
+                    {
+                        let file_1 = std::fs::File::open(seeds_dir.join(&name_1)).unwrap();
+                        let file_2 = std::fs::File::open(seeds_dir.join(&name_2)).unwrap();
+
+                        println!("{} -> {}", name_1, name_2);
+                        let diff_chunks = BinaryDiff::new(
+                            &mut BufReader::new(file_1),
+                            &mut BufReader::new(file_2),
+                        )
+                        .unwrap();
+                        for chunk in diff_chunks.enhance().chunks() {
+                            match chunk {
+                                BinaryDiffChunk::Same(_, _) => (), // Not print
+                                _ => println!("\t{}", chunk),
+                            }
+                        }
+                        println!()
+                    }
+                } else {
+                    for name in predecessors.iter() {
+                        println!("{}", name);
+                    }
+                }
+            } else {
+                eprintln!("[!] Given node does not have predecessors: sha1={}", node);
+            }
+        }
+        Err(why) => {
+            eprintln!("[!] Failed to get predecessors of {}: {:?}", node, why)
+        }
+    }
+}

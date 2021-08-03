@@ -2,10 +2,10 @@ use crate::mutation_graph::sha1_string::Sha1String;
 use crate::mutation_graph::MutationGraph;
 use binary_diff::{BinaryDiff, BinaryDiffAnalyzer, DerivesFrom};
 use clap::ArgMatches;
-use std::io::BufReader;
-use std::path::Path;
 use std::cmp::Ordering;
 use std::cmp::Ordering::Equal;
+use std::io::BufReader;
+use std::path::Path;
 
 pub(crate) fn origin(matches: &ArgMatches, graph: MutationGraph) {
     let node = match matches.value_of("SHA1") {
@@ -39,7 +39,7 @@ pub(crate) fn origin(matches: &ArgMatches, graph: MutationGraph) {
                 let node_file_size =
                     std::fs::metadata(seeds_dir.join(&node)).unwrap().len() as usize;
 
-                let mut origins:Vec<Origin>  = (0..node_file_size)
+                let mut origins: Vec<Origin> = (0..node_file_size)
                     .map(|offset| find_origin(seeds_dir, &seeds, offset))
                     .filter(|v| v.is_some())
                     .map(|v| v.unwrap())
@@ -76,7 +76,6 @@ impl PartialOrd for Origin {
         } else {
             Some(self.cmp(other))
         }
-
     }
 }
 
@@ -85,7 +84,6 @@ impl Ord for Origin {
         self.depth.cmp(&other.depth)
     }
 }
-
 
 fn find_origin(seeds_dir: &Path, seeds: &Vec<Sha1String>, offset: usize) -> Option<Origin> {
     let mut target_offset = offset;
