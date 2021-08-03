@@ -97,7 +97,10 @@ mod tests {
         assert_eq!(
             options,
             Ok(PlotOptions {
-                highlight_edges_from_root_to: None
+                highlight_edges_from_root_to: None,
+                highlight_edge_with_blue: HashSet::new(),
+                highlight_edge_with_red: HashSet::new(),
+                highlight_edge_with_green: HashSet::new()
             })
         )
     }
@@ -109,7 +112,10 @@ mod tests {
         assert_eq!(
             options,
             Ok(PlotOptions {
-                highlight_edges_from_root_to: Some(sha1_1)
+                highlight_edges_from_root_to: Some(sha1_1),
+                highlight_edge_with_blue: HashSet::new(),
+                highlight_edge_with_red: HashSet::new(),
+                highlight_edge_with_green: HashSet::new()
             })
         )
     }
