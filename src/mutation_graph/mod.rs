@@ -232,7 +232,7 @@ impl MutationGraph {
         for (node, label) in plot_options.notate.iter() {
             write!(
                 &mut res,
-                "\"note_{node}\" [label=\"{label}\", shape=plaintext, fontname=\"sans-serif\", fontsize=11.0];\n\"note_{node}\" -> \"{node}\" [color=black, style=solid, arrowhead=none, splines=curved];\n",
+                "\"note_{node}\" [label=\"{label}\", shape=plaintext, fontname=\"sans-serif\", fontsize=11.0, style=filled, fillcolor=cornsilk];\n\"note_{node}\" -> \"{node}\" [color=black, style=solid, arrowhead=none, splines=curved];\n",
                 node=node, label=label
             )
             .map_err(MutationGraphError::FmtError)?;
