@@ -7,11 +7,6 @@ pub mod plot_options;
 pub mod result;
 pub mod sha1_string;
 
-use std::collections::hash_map::Values;
-use std::collections::{HashMap, HashSet};
-use std::fmt::Write;
-use std::iter::FromIterator;
-
 use directed_edge::DirectedEdge;
 use error::MutationGraphError;
 use mutation_graph_edge::MutationGraphEdge;
@@ -19,6 +14,10 @@ use mutation_graph_node::MutationGraphNode;
 use plot_options::PlotOptions;
 use result::Result;
 use sha1_string::Sha1String;
+use std::collections::hash_map::Values;
+use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::fmt::Write;
+use std::iter::FromIterator;
 
 #[derive(Debug, Clone)]
 pub struct MutationGraph {
@@ -168,8 +167,20 @@ impl MutationGraph {
         // Start of dot file
         write!(&mut res, "digraph {{\n").map_err(MutationGraphError::FmtError)?;
 
+        // Add notes
+        // NOTE: Add notes first to place notes in preference to edges.
+        for (node, label) in plot_options.notate.iter() {
+            write!(
+                &mut res,
+                "{{rank=same; \"note_{node}\" [label=\"{label}\", shape=plaintext, fontname=\"sans-serif\", fontsize=11.0, style=filled, fillcolor=cornsilk];\n\"note_{node}\" -> \"{node}\" [color=black, style=dashed, arrowhead=none, splines=curved]}};\n",
+                node=node, label=label
+            )
+                .map_err(MutationGraphError::FmtError)?;
+        }
+
         // Declare nodes
-        for node in self.node.values() {
+        let node_heap: BinaryHeap<&MutationGraphNode> = self.node.values().map(|v| v).collect();
+        for node in node_heap.into_iter_sorted() {
             let mut additional = String::new();
             if let Some(ref target) = plot_options.highlight_edges_from_root_to {
                 if &node.sha1 == target {
@@ -182,7 +193,8 @@ impl MutationGraph {
         }
 
         // Declare edges
-        for edge in self.edge.values() {
+        let edge_heap: BinaryHeap<&MutationGraphEdge> = self.edge.values().map(|v| v).collect();
+        for edge in edge_heap.into_iter_sorted() {
             let mut additional = String::new();
             if let Some(ref target) = plot_options.highlight_edges_from_root_to {
                 if predecessors.contains(&&edge.parent)
@@ -224,16 +236,6 @@ impl MutationGraph {
                 &mut res,
                 "\"{}\" -> \"{}\" [label=\"{}\", style=dashed{}];\n",
                 weak_edge.parent, weak_edge.child, weak_edge.label, additional
-            )
-            .map_err(MutationGraphError::FmtError)?;
-        }
-
-        // Add notes
-        for (node, label) in plot_options.notate.iter() {
-            write!(
-                &mut res,
-                "\"note_{node}\" [label=\"{label}\", shape=plaintext, fontname=\"sans-serif\", fontsize=11.0, style=filled, fillcolor=cornsilk];\n\"note_{node}\" -> \"{node}\" [color=black, style=solid, arrowhead=none, splines=curved];\n",
-                node=node, label=label
             )
             .map_err(MutationGraphError::FmtError)?;
         }

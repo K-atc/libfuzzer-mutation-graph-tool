@@ -1,4 +1,5 @@
 use super::sha1_string::Sha1String;
+use std::cmp::Ordering;
 
 #[derive(Debug, Clone, Hash)]
 pub struct MutationGraphEdge {
@@ -14,3 +15,19 @@ impl PartialEq for MutationGraphEdge {
 }
 
 impl Eq for MutationGraphEdge {}
+
+impl PartialOrd for MutationGraphEdge {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for MutationGraphEdge {
+    fn cmp(&self, other: &Self) -> Ordering {
+        if self.parent.cmp(&other.parent).is_eq() {
+            self.child.cmp(&other.child)
+        } else {
+            Ordering::Equal
+        }
+    }
+}

@@ -109,7 +109,7 @@ mod tests {
     use crate::mutation_graph::plot_options::plot_option::PlotOption;
     use crate::mutation_graph::plot_options::PlotOptions;
     use crate::mutation_graph::sha1_string::Sha1String;
-    use std::collections::{HashSet, HashMap};
+    use std::collections::{HashMap, HashSet};
     use std::iter::FromIterator;
 
     #[test]
