@@ -109,7 +109,7 @@ mod tests {
     use crate::mutation_graph::plot_options::plot_option::PlotOption;
     use crate::mutation_graph::plot_options::PlotOptions;
     use crate::mutation_graph::sha1_string::Sha1String;
-    use std::collections::HashSet;
+    use std::collections::{HashSet, HashMap};
     use std::iter::FromIterator;
 
     #[test]
@@ -121,7 +121,8 @@ mod tests {
                 highlight_edges_from_root_to: None,
                 highlight_edge_with_blue: HashSet::new(),
                 highlight_edge_with_red: HashSet::new(),
-                highlight_edge_with_green: HashSet::new()
+                highlight_edge_with_green: HashSet::new(),
+                notate: HashMap::new(),
             })
         )
     }
@@ -136,7 +137,8 @@ mod tests {
                 highlight_edges_from_root_to: Some(sha1_1),
                 highlight_edge_with_blue: HashSet::new(),
                 highlight_edge_with_red: HashSet::new(),
-                highlight_edge_with_green: HashSet::new()
+                highlight_edge_with_green: HashSet::new(),
+                notate: HashMap::new(),
             })
         )
     }

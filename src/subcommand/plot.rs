@@ -22,7 +22,7 @@ pub(crate) fn plot(matches: &ArgMatches, graph: MutationGraph, mutation_graph_fi
 }
 
 fn plot_dot_graph(dot_graph_text: &String, format: &'static str, original_file: &Path) {
-    let mut child = Command::new("dot")
+    let mut child = Command::new("dot") // Use `dot` layout engine
         .arg(format!("-T{}", format))
         .arg("-o")
         .arg(original_file.with_extension(format).as_os_str())
