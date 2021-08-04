@@ -6,9 +6,9 @@ use binary_diff::{BinaryDiff, BinaryDiffAnalyzer, BinaryDiffChunk};
 use clap::ArgMatches;
 use std::cmp::Ordering;
 use std::cmp::Ordering::Equal;
+use std::fmt;
 use std::io::BufReader;
 use std::path::Path;
-use std::fmt;
 
 pub(crate) fn origin(matches: &ArgMatches, graph: MutationGraph) {
     let node = match matches.value_of("SHA1") {
@@ -98,10 +98,13 @@ struct Origin {
 
 impl fmt::Display for Origin {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Offset {:#x} derives from node \"{}\" by {})", self.of_offset, self.node, self.chunk)
+        write!(
+            f,
+            "Offset {:#x} derives from node \"{}\" by {})",
+            self.of_offset, self.node, self.chunk
+        )
     }
 }
-
 
 impl PartialEq for Origin {
     fn eq(&self, other: &Self) -> bool {

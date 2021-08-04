@@ -188,7 +188,7 @@ impl MutationGraph {
                 if predecessors.contains(&&edge.parent)
                     && (predecessors.contains(&&edge.child) || target == &edge.child)
                 {
-                    write!(&mut additional, ", color=\"red\"")
+                    write!(&mut additional, ", color=\"crimson\"")
                         .map_err(MutationGraphError::FmtError)?;
                 }
             } else if plot_options.highlight_edge_with_blue.contains(edge) {
@@ -203,7 +203,7 @@ impl MutationGraph {
 
             write!(
                 &mut res,
-                "\"{}\" -> \"{}\" [label=\"{}\", splines=\"curved\"{}];\n",
+                "\"{}\" -> \"{}\" [label=\"{}\", splines=curved{}];\n",
                 edge.parent, edge.child, edge.label, additional
             )
             .map_err(MutationGraphError::FmtError)?;
@@ -222,7 +222,7 @@ impl MutationGraph {
 
             write!(
                 &mut res,
-                "\"{}\" -> \"{}\" [label=\"{}\", style=\"dashed\"{}];\n",
+                "\"{}\" -> \"{}\" [label=\"{}\", style=dashed{}];\n",
                 weak_edge.parent, weak_edge.child, weak_edge.label, additional
             )
             .map_err(MutationGraphError::FmtError)?;
@@ -232,8 +232,8 @@ impl MutationGraph {
         for (node, label) in plot_options.notate.iter() {
             write!(
                 &mut res,
-                "\"note_{}\" [label=\"{}\", shape=\"plaintext\", fontname=\"Sans:bold\", fontsize=11.0];\n\"note_{}\" -> \"{}\" [style=\"\", shape=\"none\"];\n",
-                node, label, node, node
+                "\"note_{node}\" [label=\"{label}\", shape=plaintext, fontname=\"Sans:bold\", fontsize=11.0];\n\"note_{node}\" -> \"{node}\" [color=black, style=solid, arrowhead=none, splines=curved];\n",
+                node=node, label=label
             )
             .map_err(MutationGraphError::FmtError)?;
         }
