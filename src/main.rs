@@ -87,13 +87,13 @@ fn main() {
                 .arg(
                     Arg::with_name("plot")
                         .long("plot")
-                        .help("Output highlighted mutation graph")
+                        .help("Output highlighted mutation graph in dot format")
                         .takes_value(false),
                 )
         )
         .subcommand(
             SubCommand::with_name("origin")
-                .about("Find origin seed of each offset of SHA1")
+                .about("Find origin seeds on each offset of SHA1")
                 .arg(
                     Arg::with_name("SEEDS_DIR")
                         .help("Seed files location")
@@ -108,6 +108,12 @@ fn main() {
                         .takes_value(true)
                         .index(2),
                 )
+                .arg(
+                    Arg::with_name("plot")
+                        .long("plot")
+                        .help("Output notated mutation graph in dot format")
+                        .takes_value(false),
+                )
         )
         .get_matches();
 
@@ -115,20 +121,19 @@ fn main() {
         Some(path) => Path::new(path),
         None => {
             eprintln!("[!] FILE is not specified");
-            return
+            return;
         }
     };
-    let graph =
-        match parse_mutation_graph_file(mutation_graph_file) {
-            Ok(graph) => graph,
-            Err(why) => {
-                eprintln!(
-                    "[!] Failed to parse file {:?}: {:?}",
-                    mutation_graph_file, why
-                );
-                return
-            }
-        };
+    let graph = match parse_mutation_graph_file(mutation_graph_file) {
+        Ok(graph) => graph,
+        Err(why) => {
+            eprintln!(
+                "[!] Failed to parse file {:?}: {:?}",
+                mutation_graph_file, why
+            );
+            return;
+        }
+    };
 
     if let Some(_matches) = matches.subcommand_matches("parse") {
         println!("{:#?}", graph);

@@ -1,11 +1,11 @@
 use crate::mutation_graph::plot_options::plot_option::PlotOption;
 use crate::mutation_graph::plot_options::PlotOptions;
-use clap::ArgMatches;
-use std::io::Write;
-use std::process::{Command, Stdio};
-use std::path::Path;
 use crate::mutation_graph::sha1_string::Sha1String;
 use crate::mutation_graph::MutationGraph;
+use clap::ArgMatches;
+use std::io::Write;
+use std::path::Path;
+use std::process::{Command, Stdio};
 
 pub(crate) fn plot(matches: &ArgMatches, graph: MutationGraph, mutation_graph_file: &Path) {
     let plot_options = match matches.value_of("SHA1") {

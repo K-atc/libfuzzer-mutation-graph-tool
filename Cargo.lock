@@ -43,7 +43,7 @@ dependencies = [
 [[package]]
 name = "binary-diff"
 version = "0.1.0"
-source = "git+https://github.com/K-atc/binary-diff-rs.git#01c7f6cd58fc99aa2222ac8983832837eaf71592"
+source = "git+https://github.com/K-atc/binary-diff-rs.git#2cdbc39fcd98fbb4be5796226fe75805e773e495"
 dependencies = [
  "bcmp",
  "log",

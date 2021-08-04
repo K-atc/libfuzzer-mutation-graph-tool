@@ -1,4 +1,9 @@
 /target
 /.idea
+
+### Auto generated files
 test/sample/mutation_graph_file/*.png
 test/sample/mutation_graph_file/*.svg
+
+### Temporal files
+/*.svg

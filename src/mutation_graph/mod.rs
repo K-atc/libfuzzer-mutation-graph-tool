@@ -228,6 +228,16 @@ impl MutationGraph {
             .map_err(MutationGraphError::FmtError)?;
         }
 
+        // Add notes
+        for (node, label) in plot_options.notate.iter() {
+            write!(
+                &mut res,
+                "\"note_{}\" [label=\"{}\", shape=\"plaintext\", fontname=\"Sans:bold\", fontsize=11.0];\n\"note_{}\" -> \"{}\" [style=\"\", shape=\"none\"];\n",
+                node, label, node, node
+            )
+            .map_err(MutationGraphError::FmtError)?;
+        }
+
         // End of dot file
         write!(&mut res, "}}\n").map_err(MutationGraphError::FmtError)?;
 

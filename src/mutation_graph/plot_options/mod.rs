@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use plot_option::PlotOption;
 
@@ -11,12 +11,15 @@ use crate::mutation_graph::plot_options::error::PlotOptionError;
 use crate::mutation_graph::sha1_string::Sha1String;
 use result::Result;
 
+type Label = String;
+
 #[derive(Debug, Eq, PartialEq)]
 pub struct PlotOptions {
     pub highlight_edges_from_root_to: Option<Sha1String>,
     pub highlight_edge_with_blue: HashSet<MutationGraphEdge>,
     pub highlight_edge_with_red: HashSet<MutationGraphEdge>,
     pub highlight_edge_with_green: HashSet<MutationGraphEdge>,
+    pub notate: HashMap<Sha1String, Label>,
 }
 
 impl PlotOptions {
@@ -77,6 +80,24 @@ impl PlotOptions {
                     }
                 }
                 edges
+            },
+            notate: {
+                let mut notes: HashMap<Sha1String, Label> = HashMap::new();
+                for option in options.iter() {
+                    match option {
+                        PlotOption::NotateTo(ref node, ref label) => {
+                            match notes.get_mut(node) {
+                                Some(old_label) => {
+                                    let new_label = format!("{}\n{}", old_label, label);
+                                    notes.insert(node.clone(), new_label)
+                                }
+                                None => notes.insert(node.clone(), label.clone()),
+                            };
+                        }
+                        _ => (),
+                    }
+                }
+                notes
             },
         })
     }

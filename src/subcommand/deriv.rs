@@ -4,7 +4,7 @@ use crate::mutation_graph::plot_options::plot_option::PlotOption;
 use crate::mutation_graph::plot_options::PlotOptions;
 use crate::mutation_graph::sha1_string::Sha1String;
 use crate::mutation_graph::MutationGraph;
-use binary_diff::{BinaryDiff, BinaryDiffAnalyzer, BinaryDiffChunk, DerivesFrom};
+use binary_diff::{BinaryDiff, BinaryDiffAnalyzer, BinaryDiffChunk};
 use clap::ArgMatches;
 use std::io::BufReader;
 use std::path::Path;
@@ -84,25 +84,18 @@ pub(crate) fn deriv(matches: &ArgMatches, mut graph: MutationGraph) {
                                             edge
                                         }
                                     };
-                                    match derives_from {
-                                        DerivesFrom {
-                                            position: Some(_),
-                                            relative_position: _,
-                                            chunk: _,
-                                        } => plot_option
+                                    match derives_from.chunk() {
+                                        BinaryDiffChunk::Same(_, _) => plot_option
                                             .push(PlotOption::HighlightEdgeWithBlue(edge)),
-                                        DerivesFrom {
-                                            position: None,
-                                            relative_position: _,
-                                            chunk,
-                                        } => {
-                                            match chunk {
-                                                BinaryDiffChunk::Delete(_, _) => plot_option
-                                                    .push(PlotOption::HighlightEdgeWithBlue(edge)),
-                                                BinaryDiffChunk::Insert(_, _) => plot_option
-                                                    .push(PlotOption::HighlightEdgeWithGreen(edge)),
-                                                _ => log::warn!("Unexpected chunk {:?}", chunk),
-                                            }
+                                        BinaryDiffChunk::Delete(_, _) => {
+                                            plot_option
+                                                .push(PlotOption::HighlightEdgeWithBlue(edge));
+                                            break;
+                                        }
+                                        BinaryDiffChunk::Insert(_, _)
+                                        | BinaryDiffChunk::Replace(_, _, _) => {
+                                            plot_option
+                                                .push(PlotOption::HighlightEdgeWithGreen(edge));
                                             break;
                                         }
                                     }
@@ -113,29 +106,21 @@ pub(crate) fn deriv(matches: &ArgMatches, mut graph: MutationGraph) {
                             match analyze.derives_from(target_offset).unwrap() {
                                 Some(derives_from) => {
                                     println!("{} -> {}", name_1, name_2);
-                                    match derives_from {
-                                        DerivesFrom {
-                                            position: Some(position),
-                                            relative_position: _,
-                                            chunk,
-                                        } => {
-                                            target_offset = position;
+                                    match derives_from.original_position() {
+                                        Some(original_position) => {
+                                            target_offset = original_position;
                                             println!(
                                                 "\tat position {:#x} in original file",
-                                                position
+                                                original_position
                                             );
-                                            println!("\t{}", chunk);
+                                            println!("\t{}", derives_from.chunk());
                                         }
-                                        DerivesFrom {
-                                            position: None,
-                                            relative_position,
-                                            chunk,
-                                        } => {
+                                        None => {
                                             println!(
                                                 "\tat relative position {:#x} in chunk",
-                                                relative_position
+                                                derives_from.relative_position()
                                             );
-                                            println!("\t{}", chunk);
+                                            println!("\t{}", derives_from.chunk());
                                             break;
                                         }
                                     }
