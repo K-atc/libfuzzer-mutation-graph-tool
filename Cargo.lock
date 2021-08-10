@@ -43,7 +43,7 @@ dependencies = [
 [[package]]
 name = "binary-diff"
 version = "0.1.0"
-source = "git+https://github.com/K-atc/binary-diff-rs.git#9360c4e93665d1fb312942d58952fa3fb6d9e865"
+source = "git+https://github.com/K-atc/binary-diff-rs.git#18b0db7fa0a5ef170e59e05e847def22f516b1e7"
 dependencies = [
  "bcmp",
  "log",
@@ -125,9 +125,9 @@ checksum = "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
 
 [[package]]
 name = "libc"
-version = "0.2.98"
+version = "0.2.99"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "320cfe77175da3a483efed4bc0adc1968ca050b098ce4f2f1c13a56626128790"
+checksum = "a7f823d141fe0a24df1e23b4af4e3c7ba9e5966ec514ea068c93024aa7deb765"
 
 [[package]]
 name = "libfuzzer-mutation-graph-tool"

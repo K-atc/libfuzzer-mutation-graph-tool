@@ -10,6 +10,7 @@ extern crate regex;
 
 use clap::{App, Arg, SubCommand};
 use std::path::Path;
+use std::path::PathBuf;
 
 use crate::mutation_graph::parser::parse_mutation_graph_file;
 use crate::subcommand::deriv::deriv;
@@ -109,6 +110,13 @@ fn main() {
                         .index(2),
                 )
                 .arg(
+                    Arg::with_name("MINIMIZED_CRASH_INPUT")
+                        .help("If MINIMIZED_CRASH_INPUT is specified, offsets deleted by MINIMIZED_CRASH_INPUT are ignored during origin analysis")
+                        .required(false)
+                        .takes_value(true)
+                        .index(3),
+                )
+                .arg(
                     Arg::with_name("plot")
                         .long("plot")
                         .help("Output notated mutation graph in dot format")
@@ -148,7 +156,11 @@ fn main() {
     } else if let Some(matches) = matches.subcommand_matches("deriv") {
         deriv(matches, graph)
     } else if let Some(matches) = matches.subcommand_matches("origin") {
-        origin(matches, graph)
+        let additional_file = match matches.value_of("MINIMIZED_CRASH_INPUT") {
+            Some(additional_file) => Some(PathBuf::from(additional_file)),
+            None => None
+        };
+        origin(matches, graph, additional_file)
     } else if let Some(matches) = matches.subcommand_matches("plot") {
         plot(matches, graph, mutation_graph_file)
     } else {

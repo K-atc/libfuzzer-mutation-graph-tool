@@ -184,7 +184,7 @@ impl MutationGraph {
             let mut additional = String::new();
             if let Some(ref target) = plot_options.highlight_edges_from_root_to {
                 if &node.sha1 == target {
-                    write!(&mut additional, "color=\"red\"")
+                    write!(&mut additional, "color=\"crimson\"")
                         .map_err(MutationGraphError::FmtError)?;
                 }
             }
@@ -200,7 +200,7 @@ impl MutationGraph {
                 if predecessors.contains(&&edge.parent)
                     && (predecessors.contains(&&edge.child) || target == &edge.child)
                 {
-                    write!(&mut additional, ", color=\"crimson\"")
+                    write!(&mut additional, ", color=\"crimson\", penwidth=1.21")
                         .map_err(MutationGraphError::FmtError)?;
                 }
             } else if plot_options.highlight_edge_with_blue.contains(edge) {
