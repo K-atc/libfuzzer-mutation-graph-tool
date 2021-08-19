@@ -42,9 +42,15 @@ fn main() {
             SubCommand::with_name("pred")
                 .about("List predecessor of given node.")
                 .arg(
-                    Arg::with_name("SEEDS_DIR")
+                    Arg::with_name("SEEDS_DIR_TO_DIFF")
                         .long("diff")
                         .help("Diff seeds locate in SEEDS_DIR")
+                        .takes_value(true),
+                )
+                .arg(
+                    Arg::with_name("SEEDS_DIR_TO_EXISTS")
+                        .long("exists")
+                        .help("List predecessors locate in SEEDS_DIR")
                         .takes_value(true),
                 )
                 .arg(
@@ -158,7 +164,7 @@ fn main() {
     } else if let Some(matches) = matches.subcommand_matches("origin") {
         let additional_file = match matches.value_of("MINIMIZED_CRASH_INPUT") {
             Some(additional_file) => Some(PathBuf::from(additional_file)),
-            None => None
+            None => None,
         };
         origin(matches, graph, additional_file)
     } else if let Some(matches) = matches.subcommand_matches("plot") {

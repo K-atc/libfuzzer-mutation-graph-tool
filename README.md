@@ -17,6 +17,7 @@ Functions
 Subcommands provides following functions.
 
 ```
+$ cargo run -q -- --help
 libfuzzer-mutation-graph-tool 1.0
 Nao Tomori (@K_atc)
 A Tool to interact with libfuzzer's mutation graph file.
@@ -32,15 +33,16 @@ ARGS:
     <FILE>    A mutation graph file.
 
 SUBCOMMANDS:
+    deriv     Analyze derivation of OFFSET of SHA1
     help      Prints this message or the help of the given subcommand(s)
     leaves    List leaf nodes.
     ls        List nodes.
+    origin    Find origin seeds on each offset of SHA1
     parse     Just parse mutation graph file.
     plot      Plot mutation graph file and save as PNG, SVG.
               This command requires graphviz.
     pred      List predecessor of given node.
     roots     List root nodes.
-
 ```
 
 

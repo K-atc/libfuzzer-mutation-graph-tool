@@ -55,7 +55,11 @@ pub(crate) fn origin(
                 if let Some(ref minimized_crash_input) = minimized_crash_input {
                     let mut sorted_ignored_offsets: Vec<&Offset> = ignored_offsets.iter().collect();
                     sorted_ignored_offsets.sort();
-                    log::info!("Offsets {:?} of {} are ignored", sorted_ignored_offsets, minimized_crash_input.display())
+                    log::info!(
+                        "Offsets {:?} of {} are ignored",
+                        sorted_ignored_offsets,
+                        minimized_crash_input.display()
+                    )
                 }
 
                 let mut origins: Vec<Origin> = (0..node_file_size)
