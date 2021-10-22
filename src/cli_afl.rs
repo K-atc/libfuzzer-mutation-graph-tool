@@ -12,6 +12,7 @@ use crate::seed_tree::plot_options::PlotOptions;
 use crate::subcommand::afl::plot::plot;
 use crate::subcommand::common::roots::roots;
 use clap::{App, Arg, SubCommand};
+use crate::subcommand::common::leaves::leaves;
 
 fn main() {
     env_logger::init();
@@ -53,6 +54,7 @@ fn main() {
                 ),
         )
         .subcommand(SubCommand::with_name("roots").about("List root nodes."))
+        .subcommand(SubCommand::with_name("leaves").about("List leaf nodes."))
         .get_matches();
 
     let input_dirs: Vec<&str> = match matches.values_of("INPUT_DIR") {
@@ -79,6 +81,8 @@ fn main() {
         plot(matches, graph);
     } else if let Some(_matches) = matches.subcommand_matches("roots") {
         roots(graph);
+    } else if let Some(_matches) = matches.subcommand_matches("leaves") {
+        leaves(graph);
     } else {
         eprintln!("[!] No subcommand specified");
     }
