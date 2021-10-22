@@ -7,7 +7,7 @@ extern crate clap;
 extern crate log;
 extern crate regex;
 
-use crate::seed_tree::parser::afl::parse_afl_input_directories;
+use crate::seed_tree::parser::afl::{parse_afl_input_directories, AFLExtensions};
 use crate::seed_tree::plot_options::PlotOptions;
 use crate::subcommand::afl::plot::plot;
 use clap::{App, Arg, SubCommand};
@@ -25,6 +25,12 @@ fn main() {
                 .required(true)
                 .index(1)
                 .multiple(true),
+        )
+        .arg(
+            Arg::with_name("ENABLE_AURORA")
+                .long("aurora")
+                .help("Enable [AUORA] extension. [AUORA] is https://github.com/RUB-SysSec/aurora")
+                .takes_value(false),
         )
         .subcommand(
             SubCommand::with_name("parse")
@@ -52,7 +58,18 @@ fn main() {
         None => panic!("INPUT_DIR is blank"),
     };
     log::info!("input_dirs = {:?}", input_dirs);
-    let graph = parse_afl_input_directories(input_dirs).unwrap();
+    let extensions = AFLExtensions {
+        aurora: matches.is_present("ENABLE_AURORA"),
+    };
+    log::info!(
+        "AURORA extension is {}",
+        if extensions.aurora {
+            "Enabled"
+        } else {
+            "Disabled"
+        }
+    );
+    let graph = parse_afl_input_directories(input_dirs, &extensions).unwrap();
 
     if let Some(_matches) = matches.subcommand_matches("parse") {
         println!("{}", graph.dot_graph(PlotOptions::none()).unwrap());

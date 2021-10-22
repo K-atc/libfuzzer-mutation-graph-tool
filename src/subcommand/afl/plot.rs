@@ -20,6 +20,6 @@ pub(crate) fn plot(matches: &ArgMatches, graph: MutationGraph) {
         .dot_graph(PlotOptions::from(plot_options.as_slice()).unwrap())
         .expect("Failed to generate dot file");
 
-    plot_dot_graph(&dot_graph_text, "png", &seed_tree_file);
     plot_dot_graph(&dot_graph_text, "svg", &seed_tree_file);
+    plot_dot_graph(&dot_graph_text, "png", &seed_tree_file);
 }

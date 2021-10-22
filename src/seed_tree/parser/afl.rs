@@ -7,10 +7,27 @@ use regex::Regex;
 use std::path::Path;
 use std::path::PathBuf;
 
-pub fn parse_afl_input_directories<T: AsRef<Path>>(directories: Vec<T>) -> Result<MutationGraph> {
+pub struct AFLExtensions {
+    pub(crate) aurora: bool,
+}
+
+impl AFLExtensions {
+    pub fn none(&self) -> bool {
+        !self.aurora
+    }
+
+    pub fn aurora(&self) -> bool {
+        self.aurora
+    }
+}
+
+pub fn parse_afl_input_directories<T: AsRef<Path>>(
+    directories: Vec<T>,
+    extensions: &AFLExtensions,
+) -> Result<MutationGraph> {
     let mut res = MutationGraph::new();
     for directory in directories {
-        parse_afl_input_directory(directory, &mut res)?;
+        parse_afl_input_directory(directory, &mut res, extensions)?;
     }
     Ok(res)
 }
@@ -18,6 +35,7 @@ pub fn parse_afl_input_directories<T: AsRef<Path>>(directories: Vec<T>) -> Resul
 fn parse_afl_input_directory<T: AsRef<Path>>(
     directory: T,
     graph: &mut MutationGraph,
+    extensions: &AFLExtensions,
 ) -> Result<()> {
     if directory.as_ref().is_file() {
         return Err(ParseError::UnexpectedFilePath(
@@ -25,29 +43,48 @@ fn parse_afl_input_directory<T: AsRef<Path>>(
         ));
     }
 
-    visit_directory(directory.as_ref().to_path_buf(), graph)?;
+    visit_directory(directory.as_ref().to_path_buf(), graph, extensions)?;
 
     Ok(())
 }
 
-fn visit_directory(directory: PathBuf, graph: &mut MutationGraph) -> Result<()> {
+fn visit_directory(
+    directory: PathBuf,
+    graph: &mut MutationGraph,
+    extensions: &AFLExtensions,
+) -> Result<()> {
     log::trace!("Scanning directory {:?}", directory);
 
-    let one_line_info = Regex::new("^id:(\\S+),(src|orig):([^:]+)(,op:(\\S+))?$")
-        .map_err(ParseError::RegexError)?;
+    let one_line_info = Regex::new(if extensions.aurora() {
+        "^id:(\\S+),(src|orig):([^:]+)(,op:([^_]+)(_(\\S+))?)?$"
+    } else {
+        "^id:(\\S+),(src|orig):([^:]+)(,op:([^_]+))?$"
+    })
+    .map_err(ParseError::RegexError)?;
 
     for entry in directory.read_dir().map_err(ParseError::IoError)? {
         let path = entry.map_err(ParseError::IoError)?.path();
         let file_name = match path.file_name() {
             Some(file_name) => file_name.to_str().ok_or(ParseError::StringEncoding)?,
             // Recursively iterate directory
-            None => return visit_directory(path, graph),
+            None => return visit_directory(path, graph, extensions),
         };
         // log::trace!("parsing file name: {}", file_name);
         match one_line_info.captures(file_name) {
             Some(captures) => {
                 let id = match captures.get(1) {
-                    Some(id) => id.as_str(),
+                    Some(id) => {
+                        if extensions.aurora() {
+                            match captures.get(7) {
+                                Some(non_crash_id) => {
+                                    format!("{}/{}", id.as_str(), non_crash_id.as_str())
+                                }
+                                None => id.as_str().to_string(),
+                            }
+                        } else {
+                            id.as_str().to_string()
+                        }
+                    }
                     None => {
                         return Err(ParseError::SyntaxError(
                             "'id' does not exists",
