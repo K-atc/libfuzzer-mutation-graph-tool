@@ -7,3 +7,5 @@ test/sample/mutation_graph_file/*.svg
 
 ### Temporal files
 /*.svg
+/*.dot
+/*.png

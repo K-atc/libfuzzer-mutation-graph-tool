@@ -1,4 +1,4 @@
-libfuzzer-mutation-graph-tool
+seed-tree-analyzer
 ====
 
 
@@ -7,23 +7,24 @@ This option has the following function (cited from their help message).
 
 > Saves a graph (in DOT format) to mutation_graph_file. The graph contains a vertex for each input that has unique coverage; directed edges are provided between parents and children where the child has unique coverage, and are recorded with the type of mutation that caused the child.
 
-*libfuzzer-mutation-graph-tool* is (maybe) useful to interact with libfuzzer's mutation graph file.
+*seed-tree-analyzer* is (maybe) useful to interact with libfuzzer's mutation graph file and AFL's seed tree.
 
 **NOTE: This tool is unstable**
 
 
 Functions
 ----
+### For libfuzzer
 Subcommands provides following functions.
 
 ```
-$ cargo run -q -- --help
-libfuzzer-mutation-graph-tool 1.0
+$ cargo run -q --bin seed-tree-analyzer-libfuzzer --features libfuzzer -- help
+seed-tree-analyzer-libfuzzer 1.0
 Nao Tomori (@K_atc)
 A Tool to interact with libfuzzer's mutation graph file.
 
 USAGE:
-    libfuzzer-mutation-graph-tool <FILE> [SUBCOMMAND]
+    seed-tree-analyzer-libfuzzer <FILE> [SUBCOMMAND]
 
 FLAGS:
     -h, --help       Prints help information
@@ -45,37 +46,61 @@ SUBCOMMANDS:
     roots     List root nodes.
 ```
 
+### For AFL
+```
+$ cargo run -q --bin seed-tree-analyzer-afl --features afl -- help
+seed-tree-analyzer-afl 1.0
+Nao Tomori (@K_atc)
+A Tool to interact with AFL's seed tree described in inputs file name.
+
+USAGE:
+    seed-tree-analyzer-afl <INPUT_DIR>... [SUBCOMMAND]
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+ARGS:
+    <INPUT_DIR>...    Directories contains AFL's input files.
+
+SUBCOMMANDS:
+    help     Prints this message or the help of the given subcommand(s)
+    parse    Scan INPUT_DIR(s) and output seed tree in dot format.
+    plot     Plot and save seed tree as DOT, PNG, SVG.
+             This command requires graphviz.
+```
+
 
 Requirements
 ----
 * Cargo & Rust 
     * Nightly required
 * (Optional) Graphviz
-    * To plot dot file
+    * To render dot file
 
 
 How to install
 ----
 ### Using `cargo install`
 ```shell
-cargo install --git https://github.com/K-atc/libfuzzer-mutation-graph-tool.git
+cargo install --git https://github.com/K-atc/seed-tree-analyzer.git --bins --all-features
 ```
 
 
 How to build
 ----
 ```shell
-cargo build
+cargo build --bins --all-features
 ```
 
 
-How to run
+How to run `seed-tree-analyzer-libfuzzer`
 ----
 ### `pred`
 List predecessors of `93d730`.
 
 ```shell
-$ cargo run -q test/sample/mutation_graph_file/graph1.dot pred 93d7302ce24b88e8f9c27e37871cc72502aff5e2
+$ seed-tree-analyzer-libfuzzer test/sample/mutation_graph_file/graph1.dot pred 93d7302ce24b88e8f9c27e37871cc72502aff5e2
 adc83b19e793491b1c6ea0fd8b46cd9f32e592fc
 a2dfa9429bf2a04d8f23fe980209bd5315f80523
 47ded72503d8ca82bbd9d2291fd1ea4ad6b1453c
@@ -93,7 +118,7 @@ MS: 1 ChangeBinInt-; base unit: c298122410da09836c59484e995c287294c31394
 We can observe how seeds which are predecessors of `c29812` were generated, using *libfuzzer-mutation-graph-tool*:
 
 ```
-$ cargo run -q test/sample/mutation_graph_file/fuzzer-test-suite-openssl-1.0.1f.dot pred c298122410da09836c59484e995c287294c31394 --diff test/sample/seeds/fuzzer-test-suite-openssl-1.0.1f/
+$ seed-tree-analyzer-libfuzzer test/sample/mutation_graph_file/fuzzer-test-suite-openssl-1.0.1f.dot pred c298122410da09836c59484e995c287294c31394 --diff test/sample/seeds/fuzzer-test-suite-openssl-1.0.1f/
 adc83b19e793491b1c6ea0fd8b46cd9f32e592fc -> c5c050e132b1ee3a4f627b3b0350b77737f5f181
         Insert (offset=0x0, bytes=[2b])
         Insert (offset=0x1, bytes=[0e])
@@ -133,3 +158,8 @@ dd0d17f2261fa314c23cd3ab442f3e4b1279e5ca -> 76e46ec1efcdcb854486037defc3e777a625
 76e46ec1efcdcb854486037defc3e777a62524ed -> c298122410da09836c59484e995c287294c31394
         Replace(offset=0x1a, length=0x1, bytes=[1d])
 ```
+
+
+How to run `seed-tree-analyzer-afl`
+----
+TODO
