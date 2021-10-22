@@ -105,7 +105,7 @@ fn visit_directory(
                 };
                 let op = match captures.get(5) {
                     Some(op) => op.as_str(),
-                    None => "(root seed)",
+                    None => "origin",
                 };
 
                 for src in src_list {

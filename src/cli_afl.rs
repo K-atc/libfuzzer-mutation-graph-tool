@@ -10,6 +10,7 @@ extern crate regex;
 use crate::seed_tree::parser::afl::{parse_afl_input_directories, AFLExtensions};
 use crate::seed_tree::plot_options::PlotOptions;
 use crate::subcommand::afl::plot::plot;
+use crate::subcommand::common::roots::roots;
 use clap::{App, Arg, SubCommand};
 
 fn main() {
@@ -51,6 +52,7 @@ fn main() {
                         .index(2),
                 ),
         )
+        .subcommand(SubCommand::with_name("roots").about("List root nodes."))
         .get_matches();
 
     let input_dirs: Vec<&str> = match matches.values_of("INPUT_DIR") {
@@ -75,6 +77,8 @@ fn main() {
         println!("{}", graph.dot_graph(PlotOptions::none()).unwrap());
     } else if let Some(matches) = matches.subcommand_matches("plot") {
         plot(matches, graph);
+    } else if let Some(_matches) = matches.subcommand_matches("roots") {
+        roots(graph);
     } else {
         eprintln!("[!] No subcommand specified");
     }

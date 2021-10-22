@@ -86,6 +86,12 @@ How to install
 cargo install --git https://github.com/K-atc/seed-tree-analyzer.git --bins --all-features
 ```
 
+Or manually git clone and:
+
+```shell
+cargo install --path . --bins --all-features
+```
+
 
 How to build
 ----

@@ -1,6 +1,7 @@
 #[cfg(feature = "afl")]
-pub mod afl;
+pub(crate) mod afl;
 #[cfg(feature = "libfuzzer")]
-pub mod libfuzzer;
+pub(crate) mod libfuzzer;
 
-pub mod util;
+pub(crate) mod common;
+pub(crate) mod util;
