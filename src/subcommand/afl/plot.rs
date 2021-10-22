@@ -21,5 +21,9 @@ pub(crate) fn plot(matches: &ArgMatches, graph: MutationGraph) {
         .expect("Failed to generate dot file");
 
     plot_dot_graph(&dot_graph_text, "svg", &seed_tree_file);
-    plot_dot_graph(&dot_graph_text, "png", &seed_tree_file);
+    if graph.leaves().len() < 2048 {
+        plot_dot_graph(&dot_graph_text, "png", &seed_tree_file);
+    } else {
+        log::warn!("This seed tree might be too wide. So omitting plotting to PNG file.");
+    }
 }
