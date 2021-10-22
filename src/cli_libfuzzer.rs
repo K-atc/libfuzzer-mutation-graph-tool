@@ -1,7 +1,7 @@
 #![feature(binary_heap_into_iter_sorted)]
 
-pub mod mutation_graph;
-mod subcommand;
+pub mod seed_tree;
+pub mod subcommand;
 
 extern crate binary_diff;
 extern crate clap;
@@ -12,19 +12,19 @@ use clap::{App, Arg, SubCommand};
 use std::path::Path;
 use std::path::PathBuf;
 
-use crate::mutation_graph::parser::parse_mutation_graph_file;
-use crate::subcommand::deriv::deriv;
-use crate::subcommand::leaves::leaves;
-use crate::subcommand::ls::ls;
-use crate::subcommand::origin::origin;
-use crate::subcommand::plot::plot;
-use crate::subcommand::pred::pred;
-use crate::subcommand::roots::roots;
+use crate::seed_tree::parser::libfuzzer::parse_libfuzzer_mutation_graph_file;
+use crate::subcommand::libfuzzer::deriv::deriv;
+use crate::subcommand::libfuzzer::leaves::leaves;
+use crate::subcommand::libfuzzer::ls::ls;
+use crate::subcommand::libfuzzer::origin::origin;
+use crate::subcommand::libfuzzer::plot::plot;
+use crate::subcommand::libfuzzer::pred::pred;
+use crate::subcommand::libfuzzer::roots::roots;
 
 fn main() {
     env_logger::init();
 
-    let matches = App::new("libfuzzer-mutation-graph-tool")
+    let matches = App::new("seed-tree-analyzer-libfuzzer")
         .version("1.0")
         .author("Nao Tomori (@K_atc)")
         .about("A Tool to interact with libfuzzer's mutation graph file.")
@@ -138,7 +138,7 @@ fn main() {
             return;
         }
     };
-    let graph = match parse_mutation_graph_file(mutation_graph_file) {
+    let graph = match parse_libfuzzer_mutation_graph_file(mutation_graph_file) {
         Ok(graph) => graph,
         Err(why) => {
             eprintln!(

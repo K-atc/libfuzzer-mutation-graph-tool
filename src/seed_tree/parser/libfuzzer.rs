@@ -1,21 +1,23 @@
-use crate::mutation_graph::MutationGraph;
+use super::result::Result;
+use crate::seed_tree::mutation_graph_edge::MutationGraphEdge;
+use crate::seed_tree::mutation_graph_node::MutationGraphNode;
+use crate::seed_tree::parser::error::ParseError;
+use crate::seed_tree::MutationGraph;
+use regex::Regex;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
 
-pub mod error;
-pub mod result;
-
-use crate::mutation_graph::mutation_graph_edge::MutationGraphEdge;
-use crate::mutation_graph::mutation_graph_node::MutationGraphNode;
-use crate::mutation_graph::parser::error::ParseError;
-use regex::Regex;
-use result::Result;
-
-pub fn parse_mutation_graph_file<T: AsRef<Path>>(file: T) -> Result<MutationGraph> {
+pub fn parse_libfuzzer_mutation_graph_file<T: AsRef<Path>>(file: T) -> Result<MutationGraph> {
     let mut graph = MutationGraph::new();
 
     {
+        if file.as_ref().is_dir() {
+            return Err(ParseError::UnexpectedDirectoryPath(
+                file.as_ref().to_path_buf(),
+            ));
+        }
+
         // Mutation graph file syntax
         let node = Regex::new("^\\s*\"([\\d[:alpha:]]+)\"\\s*$").map_err(ParseError::RegexError)?;
         let edge = Regex::new(

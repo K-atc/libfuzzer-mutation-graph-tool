@@ -1,5 +1,5 @@
-use crate::mutation_graph::sha1_string::Sha1String;
-use crate::mutation_graph::MutationGraph;
+use crate::seed_tree::sha1_string::Sha1String;
+use crate::seed_tree::MutationGraph;
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
 

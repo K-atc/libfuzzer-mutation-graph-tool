@@ -6,9 +6,9 @@ pub mod error;
 pub mod plot_option;
 pub mod result;
 
-use crate::mutation_graph::mutation_graph_edge::MutationGraphEdge;
-use crate::mutation_graph::plot_options::error::PlotOptionError;
-use crate::mutation_graph::sha1_string::Sha1String;
+use crate::seed_tree::mutation_graph_edge::MutationGraphEdge;
+use crate::seed_tree::plot_options::error::PlotOptionError;
+use crate::seed_tree::sha1_string::Sha1String;
 use result::Result;
 
 type Label = String;
@@ -23,6 +23,16 @@ pub struct PlotOptions {
 }
 
 impl PlotOptions {
+    pub fn none() -> Self {
+        Self {
+            highlight_edges_from_root_to: None,
+            highlight_edge_with_blue: Default::default(),
+            highlight_edge_with_red: Default::default(),
+            highlight_edge_with_green: Default::default(),
+            notate: Default::default(),
+        }
+    }
+
     pub fn from(options: &[PlotOption]) -> Result<Self> {
         Ok(Self {
             highlight_edges_from_root_to: {
@@ -105,10 +115,10 @@ impl PlotOptions {
 
 #[cfg(test)]
 mod tests {
-    use crate::mutation_graph::plot_options::error::PlotOptionError;
-    use crate::mutation_graph::plot_options::plot_option::PlotOption;
-    use crate::mutation_graph::plot_options::PlotOptions;
-    use crate::mutation_graph::sha1_string::Sha1String;
+    use crate::seed_tree::plot_options::error::PlotOptionError;
+    use crate::seed_tree::plot_options::plot_option::PlotOption;
+    use crate::seed_tree::plot_options::PlotOptions;
+    use crate::seed_tree::sha1_string::Sha1String;
     use std::collections::{HashMap, HashSet};
     use std::iter::FromIterator;
 

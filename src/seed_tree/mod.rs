@@ -252,11 +252,11 @@ mod test {
     use std::collections::HashSet;
     use std::iter::FromIterator;
 
-    use crate::mutation_graph::error::MutationGraphError;
-    use crate::mutation_graph::mutation_graph_edge::MutationGraphEdge;
-    use crate::mutation_graph::mutation_graph_node::MutationGraphNode;
-    use crate::mutation_graph::sha1_string::Sha1String;
-    use crate::mutation_graph::MutationGraph;
+    use crate::seed_tree::error::MutationGraphError;
+    use crate::seed_tree::mutation_graph_edge::MutationGraphEdge;
+    use crate::seed_tree::mutation_graph_node::MutationGraphNode;
+    use crate::seed_tree::sha1_string::Sha1String;
+    use crate::seed_tree::MutationGraph;
 
     impl MutationGraphEdge {
         pub fn new(parent: &Sha1String, child: &Sha1String) -> Self {

@@ -1,6 +1,6 @@
 use super::sha1_string::Sha1String;
 
-use crate::mutation_graph::mutation_graph_edge::MutationGraphEdge;
+use crate::seed_tree::mutation_graph_edge::MutationGraphEdge;
 use std::hash::{Hash, Hasher};
 
 #[derive(Debug, Clone)]

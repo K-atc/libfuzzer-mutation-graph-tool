@@ -1,5 +1,5 @@
-use crate::mutation_graph::sha1_string::Sha1String;
-use crate::mutation_graph::MutationGraph;
+use crate::seed_tree::sha1_string::Sha1String;
+use crate::seed_tree::MutationGraph;
 use binary_diff::{BinaryDiff, BinaryDiffChunk};
 use clap::ArgMatches;
 use std::io::BufReader;

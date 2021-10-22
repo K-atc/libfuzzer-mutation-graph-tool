@@ -1,7 +1,7 @@
-use crate::mutation_graph::plot_options::plot_option::PlotOption;
-use crate::mutation_graph::plot_options::PlotOptions;
-use crate::mutation_graph::sha1_string::Sha1String;
-use crate::mutation_graph::MutationGraph;
+use crate::seed_tree::plot_options::plot_option::PlotOption;
+use crate::seed_tree::plot_options::PlotOptions;
+use crate::seed_tree::sha1_string::Sha1String;
+use crate::seed_tree::MutationGraph;
 use binary_diff::{BinaryDiff, BinaryDiffAnalyzer, BinaryDiffChunk};
 use clap::ArgMatches;
 use std::cmp::Ordering;
@@ -234,8 +234,8 @@ fn find_origin_of(offset: usize, seeds_dir: &Path, seeds: &Vec<Sha1String>) -> O
 
 #[cfg(test)]
 mod tests {
-    use crate::mutation_graph::parser::parse_mutation_graph_file;
-    use crate::mutation_graph::sha1_string::Sha1String;
+    use crate::seed_tree::parser::parse_mutation_graph_file;
+    use crate::seed_tree::sha1_string::Sha1String;
     use crate::subcommand::origin::{calculate_deleted_offsets, find_origin_of};
     use std::collections::HashSet;
     use std::fs::File;
