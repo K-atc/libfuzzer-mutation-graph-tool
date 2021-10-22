@@ -10,9 +10,11 @@ extern crate regex;
 use crate::seed_tree::parser::afl::{parse_afl_input_directories, AFLExtensions};
 use crate::seed_tree::plot_options::PlotOptions;
 use crate::subcommand::afl::plot::plot;
+use crate::subcommand::common::leaves::leaves;
 use crate::subcommand::common::roots::roots;
 use clap::{App, Arg, SubCommand};
-use crate::subcommand::common::leaves::leaves;
+use std::path::Path;
+use crate::seed_tree::plot_options::plot_option::PlotOption;
 
 fn main() {
     env_logger::init();
@@ -24,9 +26,15 @@ fn main() {
         .arg(
             Arg::with_name("INPUT_DIR")
                 .help("Directories contains AFL's input files.")
-                .required(true)
+                .required(false)
                 .index(1)
                 .multiple(true),
+        )
+        .arg(
+            Arg::with_name("CRASH_INPUT_DIR")
+                .long("crash")
+                .help("Enable crash exploration extension. Treat CRASH_INPUT_DIR as a directory contains crash inputs. These are highlighted in the seed tree.")
+                .takes_value(true),
         )
         .arg(
             Arg::with_name("ENABLE_AURORA")
@@ -57,28 +65,39 @@ fn main() {
         .subcommand(SubCommand::with_name("leaves").about("List leaf nodes."))
         .get_matches();
 
-    let input_dirs: Vec<&str> = match matches.values_of("INPUT_DIR") {
+    // NOTE: `&str` is no problem. `parse_afl_input_directories()` converts to Path
+    let mut input_dirs: Vec<&str> = match matches.values_of("INPUT_DIR") {
         Some(input_dirs) => input_dirs.collect(),
-        None => panic!("INPUT_DIR is blank"),
+        None => Vec::new(),
     };
+    let crash_inputs_dir = match matches.value_of("CRASH_INPUT_DIR") {
+        Some(crash_inputs_dir) => {
+            input_dirs.push(crash_inputs_dir);
+            Some(Path::new(crash_inputs_dir).to_path_buf())
+        }
+        None => None,
+    };
+
+    if input_dirs.len() == 0 {
+        panic!("INPUT_DIR and CRASH_INPUT_DIR is blank. See help")
+    }
+
     log::info!("input_dirs = {:?}", input_dirs);
     let extensions = AFLExtensions {
         aurora: matches.is_present("ENABLE_AURORA"),
+        crash_inputs_dir,
     };
-    log::info!(
-        "AURORA extension is {}",
-        if extensions.aurora {
-            "Enabled"
-        } else {
-            "Disabled"
-        }
-    );
+    log::info!("Extensions: {:?}", extensions);
     let graph = parse_afl_input_directories(input_dirs, &extensions).unwrap();
 
     if let Some(_matches) = matches.subcommand_matches("parse") {
         println!("{}", graph.dot_graph(PlotOptions::none()).unwrap());
     } else if let Some(matches) = matches.subcommand_matches("plot") {
-        plot(matches, graph);
+        let plot_option = match extensions.crash_inputs_dir {
+            Some(_) => vec![PlotOption::HighlightCrashInput],
+            None => Vec::new()
+        };
+        plot(matches, graph, plot_option.as_slice());
     } else if let Some(_matches) = matches.subcommand_matches("roots") {
         roots(graph);
     } else if let Some(_matches) = matches.subcommand_matches("leaves") {

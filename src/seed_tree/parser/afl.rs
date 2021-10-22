@@ -7,8 +7,10 @@ use regex::Regex;
 use std::path::Path;
 use std::path::PathBuf;
 
+#[derive(Debug)]
 pub struct AFLExtensions {
     pub(crate) aurora: bool,
+    pub(crate) crash_inputs_dir: Option<PathBuf>,
 }
 
 impl AFLExtensions {
@@ -70,6 +72,12 @@ fn visit_directory(
             None => return visit_directory(path, graph, extensions),
         };
         // log::trace!("parsing file name: {}", file_name);
+
+        let is_crash_input_node = match extensions.crash_inputs_dir {
+            Some(ref crash_input_dir) => path.starts_with(crash_input_dir),
+            None => false
+        };
+
         match one_line_info.captures(file_name) {
             Some(captures) => {
                 let id = match captures.get(1) {
@@ -92,7 +100,7 @@ fn visit_directory(
                         ))
                     }
                 };
-                graph.add_node(&MutationGraphNode::new(&id.to_string()));
+                graph.add_node(&MutationGraphNode::new_with_metadata(&id.to_string(), is_crash_input_node));
 
                 let src_list = match captures.get(3) {
                     Some(src_list) => src_list.as_str().split("+"),

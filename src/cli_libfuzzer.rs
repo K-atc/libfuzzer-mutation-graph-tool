@@ -15,11 +15,11 @@ use std::path::PathBuf;
 use crate::seed_tree::parser::libfuzzer::parse_libfuzzer_mutation_graph_file;
 use crate::subcommand::common::roots::roots;
 use crate::subcommand::libfuzzer::deriv::deriv;
-use subcommand::common::leaves::leaves;
 use crate::subcommand::libfuzzer::ls::ls;
 use crate::subcommand::libfuzzer::origin::origin;
 use crate::subcommand::libfuzzer::plot::plot;
 use crate::subcommand::libfuzzer::pred::pred;
+use subcommand::common::leaves::leaves;
 
 fn main() {
     env_logger::init();

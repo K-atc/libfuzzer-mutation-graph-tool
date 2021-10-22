@@ -19,6 +19,7 @@ pub struct PlotOptions {
     pub highlight_edge_with_blue: HashSet<MutationGraphEdge>,
     pub highlight_edge_with_red: HashSet<MutationGraphEdge>,
     pub highlight_edge_with_green: HashSet<MutationGraphEdge>,
+    pub highlight_crash_input: bool,
     pub notate: HashMap<Sha1String, Label>,
 }
 
@@ -29,6 +30,7 @@ impl PlotOptions {
             highlight_edge_with_blue: Default::default(),
             highlight_edge_with_red: Default::default(),
             highlight_edge_with_green: Default::default(),
+            highlight_crash_input: false,
             notate: Default::default(),
         }
     }
@@ -91,6 +93,7 @@ impl PlotOptions {
                 }
                 edges
             },
+            highlight_crash_input: options.contains(&PlotOption::HighlightCrashInput),
             notate: {
                 let mut notes: HashMap<Sha1String, Label> = HashMap::new();
                 for option in options.iter() {

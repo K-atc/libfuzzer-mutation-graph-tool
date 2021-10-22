@@ -4,6 +4,7 @@ use std::cmp::Ordering;
 #[derive(Debug, Clone, Hash)]
 pub struct MutationGraphNode {
     pub sha1: Sha1String,
+    pub crashed: bool,
 }
 
 impl PartialEq for MutationGraphNode {
@@ -28,6 +29,9 @@ impl PartialOrd for MutationGraphNode {
 
 impl MutationGraphNode {
     pub fn new(sha1: &Sha1String) -> Self {
-        Self { sha1: sha1.clone() }
+        Self { sha1: sha1.clone(), crashed: false }
+    }
+    pub fn new_with_metadata(sha1: &Sha1String, crashed: bool) -> Self {
+        Self { sha1: sha1.clone(), crashed }
     }
 }

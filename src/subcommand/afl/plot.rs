@@ -6,14 +6,16 @@ use crate::subcommand::util::plot_dot_graph::plot_dot_graph;
 use clap::ArgMatches;
 use std::path::Path;
 
-pub(crate) fn plot(matches: &ArgMatches, graph: MutationGraph) {
+pub(crate) fn plot(matches: &ArgMatches, graph: MutationGraph, base_plot_options: &[PlotOption]) {
+    let mut plot_options = Vec::new();
+    plot_options.extend_from_slice(base_plot_options);
+    if let Some(v) = matches.value_of("ID") {
+        plot_options.push(PlotOption::HighlightEdgesFromRootTo(Sha1String::from(v)))
+    };
+
     let seed_tree_file = match matches.value_of("DOT_FILE") {
         Some(v) => Path::new(v),
         None => return eprintln!("DOT_FILE is not specified"),
-    };
-    let plot_options = match matches.value_of("ID") {
-        Some(v) => vec![PlotOption::HighlightEdgesFromRootTo(Sha1String::from(v))],
-        None => vec![],
     };
 
     let dot_graph_text = graph

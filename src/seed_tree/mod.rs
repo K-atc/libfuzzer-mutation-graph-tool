@@ -188,6 +188,13 @@ impl MutationGraph {
                         .map_err(MutationGraphError::FmtError)?;
                 }
             }
+            if plot_options.highlight_crash_input {
+                if node.crashed {
+                    // write!(&mut additional, "labelfontcolor=\"crimson\"")
+                    write!(&mut additional, "shape=\"septagon\", color=\"red4\"")
+                        .map_err(MutationGraphError::FmtError)?;
+                }
+            }
             write!(&mut res, "\"{}\" [{}]\n", node.sha1, additional)
                 .map_err(MutationGraphError::FmtError)?;
         }
