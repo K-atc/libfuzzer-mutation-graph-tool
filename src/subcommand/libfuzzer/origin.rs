@@ -234,9 +234,9 @@ fn find_origin_of(offset: usize, seeds_dir: &Path, seeds: &Vec<Sha1String>) -> O
 
 #[cfg(test)]
 mod tests {
-    use crate::seed_tree::parser::parse_mutation_graph_file;
+    use crate::seed_tree::parser::libfuzzer::parse_libfuzzer_mutation_graph_file;
     use crate::seed_tree::sha1_string::Sha1String;
-    use crate::subcommand::origin::{calculate_deleted_offsets, find_origin_of};
+    use crate::subcommand::libfuzzer::origin::{calculate_deleted_offsets, find_origin_of};
     use std::collections::HashSet;
     use std::fs::File;
     use std::io::BufReader;
@@ -273,7 +273,7 @@ mod tests {
         init();
 
         let seeds_dir = Path::new("test/sample/seeds/fuzzer-test-suite-openssl-1.0.1f/");
-        let graph = parse_mutation_graph_file(Path::new(
+        let graph = parse_libfuzzer_mutation_graph_file(Path::new(
             "test/sample/mutation_graph_file/fuzzer-test-suite-openssl-1.0.1f.dot",
         ))
         .unwrap();
