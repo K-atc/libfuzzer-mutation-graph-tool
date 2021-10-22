@@ -3,10 +3,11 @@ use std::path::Path;
 use std::process::{Command, Stdio};
 
 pub(crate) fn plot_dot_graph(dot_graph_text: &String, format: &'static str, original_file: &Path) {
+    let path_to_render = original_file.with_extension(format);
     let mut child = Command::new("dot") // Use `dot` layout engine
         .arg(format!("-T{}", format))
         .arg("-o")
-        .arg(original_file.with_extension(format).as_os_str())
+        .arg(path_to_render.as_os_str())
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .spawn()
@@ -21,4 +22,5 @@ pub(crate) fn plot_dot_graph(dot_graph_text: &String, format: &'static str, orig
     }
 
     let _ = child.wait_with_output().expect("Failed to read stdout");
+    log::info!("Rendered to file \"{}\"", path_to_render.display());
 }
