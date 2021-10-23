@@ -13,7 +13,7 @@ use result::Result;
 
 type Label = String;
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Default)]
 pub struct PlotOptions {
     pub highlight_edges_from_root_to: Option<Sha1String>,
     pub highlight_edge_with_blue: HashSet<MutationGraphEdge>,
@@ -26,12 +26,7 @@ pub struct PlotOptions {
 impl PlotOptions {
     pub fn none() -> Self {
         Self {
-            highlight_edges_from_root_to: None,
-            highlight_edge_with_blue: Default::default(),
-            highlight_edge_with_red: Default::default(),
-            highlight_edge_with_green: Default::default(),
-            highlight_crash_input: false,
-            notate: Default::default(),
+            ..Default::default()
         }
     }
 
@@ -122,21 +117,15 @@ mod tests {
     use crate::seed_tree::plot_options::plot_option::PlotOption;
     use crate::seed_tree::plot_options::PlotOptions;
     use crate::seed_tree::sha1_string::Sha1String;
-    use std::collections::{HashMap, HashSet};
+    use std::collections::HashSet;
     use std::iter::FromIterator;
 
     #[test]
-    fn test_plot_options_null() {
+    fn test_plot_options_none() {
         let options = PlotOptions::from(&[]);
         assert_eq!(
             options,
-            Ok(PlotOptions {
-                highlight_edges_from_root_to: None,
-                highlight_edge_with_blue: HashSet::new(),
-                highlight_edge_with_red: HashSet::new(),
-                highlight_edge_with_green: HashSet::new(),
-                notate: HashMap::new(),
-            })
+            Ok(PlotOptions::none())
         )
     }
 
@@ -148,10 +137,7 @@ mod tests {
             options,
             Ok(PlotOptions {
                 highlight_edges_from_root_to: Some(sha1_1),
-                highlight_edge_with_blue: HashSet::new(),
-                highlight_edge_with_red: HashSet::new(),
-                highlight_edge_with_green: HashSet::new(),
-                notate: HashMap::new(),
+                ..Default::default()
             })
         )
     }

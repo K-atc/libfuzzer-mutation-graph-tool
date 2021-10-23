@@ -168,7 +168,7 @@ fn main() {
         };
         origin(matches, graph, additional_file)
     } else if let Some(matches) = matches.subcommand_matches("plot") {
-        plot(matches, graph, mutation_graph_file)
+        plot(matches, graph, mutation_graph_file, &[])
     } else {
         eprintln!("[!] No subcommand specified")
     }
