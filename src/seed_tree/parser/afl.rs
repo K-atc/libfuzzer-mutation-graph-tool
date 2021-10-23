@@ -60,7 +60,7 @@ fn visit_directory(
     let one_line_info = Regex::new(if extensions.aurora() {
         "^id:(\\S+),(src|orig):([^:]+)(,op:([^_]+)(_(\\S+))?)?$"
     } else {
-        "^id:(\\S+),(src|orig):([^:]+)(,op:([^_]+))?$"
+        "^id:(\\S+),(src|orig):([^:]+)(,op:(\\S+))?$"
     })
     .map_err(ParseError::RegexError)?;
 

@@ -115,6 +115,17 @@ impl MutationGraph {
         }
     }
 
+    fn __rank_of(&self, node: &Sha1String, rank: usize) -> Result<usize> {
+        match self.parent_of(node) {
+            Some(parent) => self.__rank_of(parent, rank + 1),
+            None => Ok(rank) // If given node is root, then rank is 0.
+        }
+    }
+
+    pub fn rank_of(&self, node: &Sha1String) -> Result<usize> {
+        self.__rank_of(node, 0)
+    }
+
     pub fn predecessors_of(&self, node: &Sha1String) -> Result<Vec<&Sha1String>> {
         if self.get_node(node).is_none() {
             return Err(MutationGraphError::NodeNotExists(node.clone()));
@@ -190,7 +201,6 @@ impl MutationGraph {
             }
             if plot_options.highlight_crash_input {
                 if node.crashed {
-                    // write!(&mut additional, "labelfontcolor=\"crimson\"")
                     write!(&mut additional, "shape=\"septagon\", color=\"red4\"")
                         .map_err(MutationGraphError::FmtError)?;
                 }
@@ -342,6 +352,9 @@ mod test {
         );
 
         assert_eq!(graph.roots(), HashSet::from_iter(vec![&node_1_sha1]));
+
+        assert_eq!(graph.rank_of(&node_1_sha1), Ok(0));
+        assert_eq!(graph.rank_of(&node_5_sha1), Ok(3));
     }
 
     #[test]

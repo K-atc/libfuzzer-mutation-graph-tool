@@ -12,6 +12,7 @@ use crate::seed_tree::plot_options::PlotOptions;
 use crate::subcommand::afl::plot::plot;
 use crate::subcommand::common::leaves::leaves;
 use crate::subcommand::common::roots::roots;
+use crate::subcommand::common::max_rank::max_rank;
 use clap::{App, Arg, SubCommand};
 use std::path::Path;
 use crate::seed_tree::plot_options::plot_option::PlotOption;
@@ -63,6 +64,7 @@ fn main() {
         )
         .subcommand(SubCommand::with_name("roots").about("List root nodes."))
         .subcommand(SubCommand::with_name("leaves").about("List leaf nodes."))
+        .subcommand(SubCommand::with_name("maxrank").about("List nodes at maximum rank."))
         .get_matches();
 
     // NOTE: `&str` is no problem. `parse_afl_input_directories()` converts to Path
@@ -102,6 +104,8 @@ fn main() {
         roots(graph);
     } else if let Some(_matches) = matches.subcommand_matches("leaves") {
         leaves(graph);
+    } else if let Some(_matches) = matches.subcommand_matches("maxrank") {
+        max_rank(&graph);
     } else {
         eprintln!("[!] No subcommand specified");
     }
