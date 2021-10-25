@@ -8,14 +8,18 @@ extern crate log;
 extern crate regex;
 
 use crate::seed_tree::parser::afl::{parse_afl_input_directories, AFLExtensions};
+use crate::seed_tree::parser::generic::parse_generic_seed_tree_file;
+use crate::seed_tree::plot_options::plot_option::PlotOption;
 use crate::seed_tree::plot_options::PlotOptions;
+use crate::subcommand::afl::filter::filter;
 use crate::subcommand::afl::plot::plot;
+use crate::subcommand::common::children::children;
 use crate::subcommand::common::leaves::leaves;
-use crate::subcommand::common::roots::roots;
 use crate::subcommand::common::max_rank::max_rank;
+use crate::subcommand::common::roots::roots;
+use crate::subcommand::common::nodes::nodes;
 use clap::{App, Arg, SubCommand};
 use std::path::Path;
-use crate::seed_tree::plot_options::plot_option::PlotOption;
 
 fn main() {
     env_logger::init();
@@ -64,7 +68,48 @@ fn main() {
         )
         .subcommand(SubCommand::with_name("roots").about("List root nodes."))
         .subcommand(SubCommand::with_name("leaves").about("List leaf nodes."))
-        .subcommand(SubCommand::with_name("maxrank").about("List nodes at maximum rank."))
+        .subcommand(
+            SubCommand::with_name("maxrank")
+                .about("List nodes at maximum rank.")
+                .arg(
+                    Arg::with_name("meta")
+                        .long("meta")
+                        .takes_value(false)
+                        .help("Print metadata of nodes")
+                )
+                .arg(
+                    Arg::with_name("file")
+                        .long("file")
+                        .takes_value(false)
+                        .help("Print file path of nodes. This option cannot be enabled with --meta")
+                )
+        )
+        .subcommand(
+            SubCommand::with_name("filter")
+                .about("Filter seed tree using commandline options and print it as DOT graph")
+                .arg(
+                    Arg::with_name("PRED_ID")
+                        .long("pred")
+                        .takes_value(true)
+                        .help("Pick predecessors of PRED_ID"),
+                )
+                .arg(
+                    Arg::with_name("leaves")
+                        .long("leaves")
+                        .takes_value(false)
+                        .help("Pick leaves of picked nodes"),
+                ),
+        )
+        .subcommand(
+            SubCommand::with_name("children")
+                .about("List children of node ID")
+                .arg(
+                    Arg::with_name("ID")
+                        .help("Node ID")
+                        .required(true)
+                        .index(1),
+                ),
+        )
         .get_matches();
 
     // NOTE: `&str` is no problem. `parse_afl_input_directories()` converts to Path
@@ -81,7 +126,7 @@ fn main() {
     };
 
     if input_dirs.len() == 0 {
-        panic!("INPUT_DIR and CRASH_INPUT_DIR is blank. See help")
+        log::info!("Reading seed tree from stdin")
     }
 
     log::info!("input_dirs = {:?}", input_dirs);
@@ -90,22 +135,33 @@ fn main() {
         crash_inputs_dir,
     };
     log::info!("Extensions: {:?}", extensions);
-    let graph = parse_afl_input_directories(input_dirs, &extensions).unwrap();
+    let graph = if input_dirs.len() > 0 {
+        parse_afl_input_directories(input_dirs, &extensions).unwrap()
+    } else {
+        parse_generic_seed_tree_file(std::io::stdin()).unwrap()
+    };
+
+    let base_plot_option = match extensions.crash_inputs_dir {
+        Some(_) => vec![PlotOption::HighlightCrashInput],
+        None => Vec::new(),
+    };
 
     if let Some(_matches) = matches.subcommand_matches("parse") {
         println!("{}", graph.dot_graph(PlotOptions::none()).unwrap());
     } else if let Some(matches) = matches.subcommand_matches("plot") {
-        let plot_option = match extensions.crash_inputs_dir {
-            Some(_) => vec![PlotOption::HighlightCrashInput],
-            None => Vec::new()
-        };
-        plot(matches, graph, plot_option.as_slice());
+        plot(matches, graph, base_plot_option.as_slice());
     } else if let Some(_matches) = matches.subcommand_matches("roots") {
         roots(graph);
     } else if let Some(_matches) = matches.subcommand_matches("leaves") {
         leaves(graph);
-    } else if let Some(_matches) = matches.subcommand_matches("maxrank") {
-        max_rank(&graph);
+    } else if let Some(matches) = matches.subcommand_matches("maxrank") {
+        max_rank(matches, &graph);
+    } else if let Some(matches) = matches.subcommand_matches("filter") {
+        filter(matches, &graph, base_plot_option.as_slice());
+    } else if let Some(matches) = matches.subcommand_matches("children") {
+        children(matches, &graph);
+    }  else if let Some(matches) = matches.subcommand_matches("nodes") {
+        nodes(matches, &graph);
     } else {
         eprintln!("[!] No subcommand specified");
     }

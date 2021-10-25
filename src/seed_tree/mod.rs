@@ -46,9 +46,16 @@ impl MutationGraph {
         self.node.values()
     }
 
+    pub fn edges(&self) -> Values<DirectedEdge, MutationGraphEdge> {
+        self.edge.values()
+    }
+
     pub fn add_node(&mut self, node: &MutationGraphNode) -> () {
         self.node.insert(node.sha1.clone(), node.clone());
-        self.children.insert(node.sha1.clone(), HashSet::new());
+        if !self.children.contains_key(&node.sha1) {
+            // Initialize children on first time
+            self.children.insert(node.sha1.clone(), HashSet::new());
+        }
     }
 
     pub fn add_edge(&mut self, edge: &MutationGraphEdge) -> () {
@@ -65,16 +72,14 @@ impl MutationGraph {
             self.edge.insert(DirectedEdge::from(&edge), edge.clone());
 
             match self.children.get_mut(&edge.parent) {
-                Some(key) => {
-                    key.insert(edge.child.clone());
-                    ()
+                Some(children) => {
+                    children.insert(edge.child.clone());
                 }
                 None => {
                     self.children.insert(
                         edge.parent.clone(),
                         HashSet::from_iter([edge.child.clone()].iter().cloned()),
                     );
-                    ()
                 }
             };
 
@@ -118,7 +123,7 @@ impl MutationGraph {
     fn __rank_of(&self, node: &Sha1String, rank: usize) -> Result<usize> {
         match self.parent_of(node) {
             Some(parent) => self.__rank_of(parent, rank + 1),
-            None => Ok(rank) // If given node is root, then rank is 0.
+            None => Ok(rank), // If given node is root, then rank is 0.
         }
     }
 

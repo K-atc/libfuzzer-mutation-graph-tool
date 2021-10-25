@@ -1,17 +1,38 @@
+use crate::seed_tree::error::MutationGraphError;
+use crate::seed_tree::sha1_string::Sha1String;
+use crate::seed_tree::MutationGraph;
+use clap::ArgMatches;
 use std::cmp::Reverse;
 use std::collections::{BinaryHeap, HashSet};
-use crate::seed_tree::error::MutationGraphError;
-use crate::seed_tree::MutationGraph;
-use crate::seed_tree::sha1_string::Sha1String;
 
-pub(crate) fn max_rank(graph: &MutationGraph) {
+enum PrintOption {
+    PrintNodeName,
+    PrintFilePath,
+    PrintMetadata,
+}
+
+pub(crate) fn max_rank(matches: &ArgMatches, graph: &MutationGraph) {
+    let print_option = if matches.is_present("meta") {
+        PrintOption::PrintMetadata
+    } else if matches.is_present("file") {
+        PrintOption::PrintFilePath
+    } else {
+        PrintOption::PrintNodeName
+    };
     let max_rank_nodes = match get_max_rank_nodes(graph) {
         Ok(v) => v,
-        Err(why) => panic!("Failed to get nodes at max rank: {:?}", why)
+        Err(why) => panic!("Failed to get nodes at max rank: {:?}", why),
     };
-    let heap: BinaryHeap<Reverse<&&Sha1String>> = max_rank_nodes.iter().map(|v| Reverse(v)).collect();
+    let heap: BinaryHeap<Reverse<&&Sha1String>> =
+        max_rank_nodes.iter().map(|v| Reverse(v)).collect();
     for name in heap.into_iter_sorted() {
-        println!("{}", name.0)
+        match print_option {
+            PrintOption::PrintNodeName => println!("{}", name.0),
+            PrintOption::PrintMetadata => println!("{:?}", graph.get_node(name.0).unwrap()),
+            PrintOption::PrintFilePath => {
+                println!("{}", graph.get_node(name.0).unwrap().file.display())
+            }
+        }
     }
 }
 

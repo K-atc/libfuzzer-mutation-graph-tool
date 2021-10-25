@@ -1,10 +1,12 @@
 use super::sha1_string::Sha1String;
 use std::cmp::Ordering;
+use std::path::{Path, PathBuf};
 
-#[derive(Debug, Clone, Hash)]
+#[derive(Debug, Clone, Hash, Default)]
 pub struct MutationGraphNode {
     pub sha1: Sha1String,
     pub crashed: bool,
+    pub file: PathBuf,
 }
 
 impl PartialEq for MutationGraphNode {
@@ -29,9 +31,17 @@ impl PartialOrd for MutationGraphNode {
 
 impl MutationGraphNode {
     pub fn new(sha1: &Sha1String) -> Self {
-        Self { sha1: sha1.clone(), crashed: false }
+        Self {
+            sha1: sha1.clone(),
+            ..Default::default()
+        }
     }
-    pub fn new_with_metadata(sha1: &Sha1String, crashed: bool) -> Self {
-        Self { sha1: sha1.clone(), crashed }
+
+    pub fn new_with_metadata(sha1: &Sha1String, crashed: bool, file: &Path) -> Self {
+        Self {
+            sha1: sha1.clone(),
+            crashed,
+            file: file.to_path_buf(),
+        }
     }
 }

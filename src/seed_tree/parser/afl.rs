@@ -65,17 +65,17 @@ fn visit_directory(
     .map_err(ParseError::RegexError)?;
 
     for entry in directory.read_dir().map_err(ParseError::IoError)? {
-        let path = entry.map_err(ParseError::IoError)?.path();
-        let file_name = match path.file_name() {
+        let file_path = entry.map_err(ParseError::IoError)?.path();
+        let file_name = match file_path.file_name() {
             Some(file_name) => file_name.to_str().ok_or(ParseError::StringEncoding)?,
             // Recursively iterate directory
-            None => return visit_directory(path, graph, extensions),
+            None => return visit_directory(file_path, graph, extensions),
         };
         // log::trace!("parsing file name: {}", file_name);
 
         let is_crash_input_node = match extensions.crash_inputs_dir {
-            Some(ref crash_input_dir) => path.starts_with(crash_input_dir),
-            None => false
+            Some(ref crash_input_dir) => file_path.starts_with(crash_input_dir),
+            None => false,
         };
 
         match one_line_info.captures(file_name) {
@@ -85,7 +85,7 @@ fn visit_directory(
                         if extensions.aurora() {
                             match captures.get(7) {
                                 Some(non_crash_id) => {
-                                    format!("{}/{}", id.as_str(), non_crash_id.as_str())
+                                    format!("nc-{}", non_crash_id.as_str())
                                 }
                                 None => id.as_str().to_string(),
                             }
@@ -100,7 +100,11 @@ fn visit_directory(
                         ))
                     }
                 };
-                graph.add_node(&MutationGraphNode::new_with_metadata(&id.to_string(), is_crash_input_node));
+                graph.add_node(&MutationGraphNode::new_with_metadata(
+                    &id.to_string(),
+                    is_crash_input_node,
+                    file_path.as_path(),
+                ));
 
                 let src_list = match captures.get(3) {
                     Some(src_list) => src_list.as_str().split("+"),

@@ -6,7 +6,12 @@ use crate::subcommand::util::plot_dot_graph::plot_dot_graph;
 use clap::ArgMatches;
 use std::path::Path;
 
-pub(crate) fn plot(matches: &ArgMatches, graph: MutationGraph, mutation_graph_file: &Path, base_plot_options: &[PlotOption]) {
+pub(crate) fn plot(
+    matches: &ArgMatches,
+    graph: MutationGraph,
+    mutation_graph_file: &Path,
+    base_plot_options: &[PlotOption],
+) {
     let mut plot_options = Vec::new();
     plot_options.extend_from_slice(base_plot_options);
     if let Some(v) = matches.value_of("SHA1") {

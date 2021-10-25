@@ -123,10 +123,7 @@ mod tests {
     #[test]
     fn test_plot_options_none() {
         let options = PlotOptions::from(&[]);
-        assert_eq!(
-            options,
-            Ok(PlotOptions::none())
-        )
+        assert_eq!(options, Ok(PlotOptions::none()))
     }
 
     #[test]
