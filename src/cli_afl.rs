@@ -16,8 +16,8 @@ use crate::subcommand::afl::plot::plot;
 use crate::subcommand::common::children::children;
 use crate::subcommand::common::leaves::leaves;
 use crate::subcommand::common::max_rank::max_rank;
-use crate::subcommand::common::roots::roots;
 use crate::subcommand::common::nodes::nodes;
+use crate::subcommand::common::roots::roots;
 use clap::{App, Arg, SubCommand};
 use std::path::Path;
 
@@ -98,7 +98,19 @@ fn main() {
                         .long("leaves")
                         .takes_value(false)
                         .help("Pick leaves of picked nodes"),
-                ),
+                )
+                .arg(
+                    Arg::with_name("meta")
+                        .long("meta")
+                        .takes_value(false)
+                        .help("Print metadata of nodes")
+                )
+                .arg(
+                    Arg::with_name("file")
+                        .long("file")
+                        .takes_value(false)
+                        .help("Print file path of nodes. This option cannot be enabled with --meta")
+                )
         )
         .subcommand(
             SubCommand::with_name("children")
@@ -109,6 +121,22 @@ fn main() {
                         .required(true)
                         .index(1),
                 ),
+        )
+        .subcommand(
+            SubCommand::with_name("nodes")
+                .about("List nodes at maximum rank.")
+                .arg(
+                    Arg::with_name("meta")
+                        .long("meta")
+                        .takes_value(false)
+                        .help("Print metadata of nodes")
+                )
+                .arg(
+                    Arg::with_name("file")
+                        .long("file")
+                        .takes_value(false)
+                        .help("Print file path of nodes. This option cannot be enabled with --meta")
+                )
         )
         .get_matches();
 
@@ -160,7 +188,7 @@ fn main() {
         filter(matches, &graph, base_plot_option.as_slice());
     } else if let Some(matches) = matches.subcommand_matches("children") {
         children(matches, &graph);
-    }  else if let Some(matches) = matches.subcommand_matches("nodes") {
+    } else if let Some(matches) = matches.subcommand_matches("nodes") {
         nodes(matches, &graph);
     } else {
         eprintln!("[!] No subcommand specified");

@@ -6,6 +6,7 @@ use crate::seed_tree::MutationGraph;
 use regex::Regex;
 use std::io::{BufRead, BufReader, Read};
 
+// NOTE: As of 2021/10/26 something went wrong
 pub fn parse_generic_seed_tree_file<T: Read>(file: T) -> Result<MutationGraph> {
     let mut graph = MutationGraph::new();
 

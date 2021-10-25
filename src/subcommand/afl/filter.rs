@@ -7,6 +7,12 @@ use clap::ArgMatches;
 use std::collections::HashSet;
 use std::iter::FromIterator;
 
+enum PrintOption {
+    PrintDotGraph,
+    PrintFilePath,
+    PrintMetadata,
+}
+
 pub(crate) fn filter(matches: &ArgMatches, graph: &MutationGraph, plot_options: &[PlotOption]) {
     let predecessors = match matches.value_of("PRED_ID") {
         Some(node) => Some(Sha1String::from(node)),
@@ -22,9 +28,25 @@ pub(crate) fn filter(matches: &ArgMatches, graph: &MutationGraph, plot_options: 
         Err(why) => panic!("Failed to filter seed tree: {:?}", why),
     };
 
-    match filtered_graph.dot_graph(PlotOptions::from(plot_options).unwrap()) {
-        Ok(graph) => println!("{}", graph),
-        Err(why) => panic!("Failed to convert to DOT: {:?}", why),
+    let print_option = if matches.is_present("meta") {
+        PrintOption::PrintMetadata
+    } else if matches.is_present("file") {
+        PrintOption::PrintFilePath
+    } else {
+        PrintOption::PrintDotGraph
+    };
+
+    match print_option {
+        PrintOption::PrintDotGraph => match filtered_graph.dot_graph(PlotOptions::from(plot_options).unwrap()) {
+            Ok(graph) => println!("{}", graph),
+            Err(why) => panic!("Failed to convert to DOT: {:?}", why),
+        }
+        PrintOption::PrintMetadata => for node in filtered_graph.nodes() {
+            println!("{:?}", node)
+        }
+        PrintOption::PrintFilePath => for node in filtered_graph.nodes() {
+            println!("{}", node.file.display())
+        }
     }
 }
 
