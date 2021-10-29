@@ -13,6 +13,7 @@ use crate::seed_tree::plot_options::plot_option::PlotOption;
 use crate::seed_tree::plot_options::PlotOptions;
 use crate::subcommand::afl::filter::filter;
 use crate::subcommand::afl::plot::plot;
+use crate::subcommand::afl::preds::preds;
 use crate::subcommand::common::children::children;
 use crate::subcommand::common::leaves::leaves;
 use crate::subcommand::common::max_rank::max_rank;
@@ -24,7 +25,7 @@ use std::path::Path;
 fn main() {
     env_logger::init();
 
-    let matches = App::new("seed-tree-analyzer-afl")
+    let matches = App::new("seed-tree-analyzer-afl-aurora-crash-exploration")
         .version("1.0")
         .author("Nao Tomori (@K_atc)")
         .about("A Tool to interact with AFL's seed tree described in inputs file name.")
@@ -138,6 +139,27 @@ fn main() {
                         .help("Print file path of nodes. This option cannot be enabled with --meta")
                 )
         )
+        .subcommand(
+            SubCommand::with_name("preds")
+                .about("List predecessors of given ID and ID")
+                .arg(
+                    Arg::with_name("ID")
+                        .required(true)
+                        .index(1)
+                )
+                .arg(
+                    Arg::with_name("meta")
+                        .long("meta")
+                        .takes_value(false)
+                        .help("Print metadata of matched nodes")
+                )
+                .arg(
+                    Arg::with_name("file")
+                        .long("file")
+                        .takes_value(false)
+                        .help("Print file path of matched nodes. This option cannot be enabled with --meta")
+                )
+        )
         .get_matches();
 
     // NOTE: `&str` is no problem. `parse_afl_input_directories()` converts to Path
@@ -190,6 +212,8 @@ fn main() {
         children(matches, &graph);
     } else if let Some(matches) = matches.subcommand_matches("nodes") {
         nodes(matches, &graph);
+    } else if let Some(matches) = matches.subcommand_matches("preds") {
+        preds(matches, &graph);
     } else {
         eprintln!("[!] No subcommand specified");
     }

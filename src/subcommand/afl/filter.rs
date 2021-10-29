@@ -37,15 +37,21 @@ pub(crate) fn filter(matches: &ArgMatches, graph: &MutationGraph, plot_options: 
     };
 
     match print_option {
-        PrintOption::PrintDotGraph => match filtered_graph.dot_graph(PlotOptions::from(plot_options).unwrap()) {
-            Ok(graph) => println!("{}", graph),
-            Err(why) => panic!("Failed to convert to DOT: {:?}", why),
+        PrintOption::PrintDotGraph => {
+            match filtered_graph.dot_graph(PlotOptions::from(plot_options).unwrap()) {
+                Ok(graph) => println!("{}", graph),
+                Err(why) => panic!("Failed to convert to DOT: {:?}", why),
+            }
         }
-        PrintOption::PrintMetadata => for node in filtered_graph.nodes() {
-            println!("{:?}", node)
+        PrintOption::PrintMetadata => {
+            for node in filtered_graph.nodes() {
+                println!("{:?}", node)
+            }
         }
-        PrintOption::PrintFilePath => for node in filtered_graph.nodes() {
-            println!("{}", node.file.display())
+        PrintOption::PrintFilePath => {
+            for node in filtered_graph.nodes() {
+                println!("{}", node.file.display())
+            }
         }
     }
 }

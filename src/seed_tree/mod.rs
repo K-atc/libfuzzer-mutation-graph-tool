@@ -51,6 +51,7 @@ impl MutationGraph {
     }
 
     pub fn add_node(&mut self, node: &MutationGraphNode) -> () {
+        // NOTE: *Last* inserted node overwhelms existing node when nodes with same name are inserted
         self.node.insert(node.sha1.clone(), node.clone());
         if !self.children.contains_key(&node.sha1) {
             // Initialize children on first time

@@ -58,18 +58,24 @@ fn visit_directory(
     log::trace!("Scanning directory {:?}", directory);
 
     let one_line_info = Regex::new(if extensions.aurora() {
-        "^id:(\\S+),(src|orig):([^:]+)(,op:([^_]+)(_(\\S+))?)?$"
+        "^id:([^:]+),(?:sig:\\d+,)?(src|orig):([^:]+)(,op:([^_]+)(_(\\S+))?)?$"
     } else {
-        "^id:(\\S+),(src|orig):([^:]+)(,op:(\\S+))?$"
+        "^id:([^:]+),(?:sig:\\d+,)?(src|orig):([^:]+)(,op:(\\S+))?$"
     })
     .map_err(ParseError::RegexError)?;
 
     for entry in directory.read_dir().map_err(ParseError::IoError)? {
         let file_path = entry.map_err(ParseError::IoError)?.path();
+
+        // Recursively iterate directory
+        if file_path.is_dir() {
+            visit_directory(file_path, graph, extensions);
+            continue;
+        }
+
         let file_name = match file_path.file_name() {
             Some(file_name) => file_name.to_str().ok_or(ParseError::StringEncoding)?,
-            // Recursively iterate directory
-            None => return visit_directory(file_path, graph, extensions),
+            None => return Err(ParseError::UnexpectedFilePath(file_path)),
         };
         // log::trace!("parsing file name: {}", file_name);
 
@@ -130,13 +136,78 @@ fn visit_directory(
                 }
             }
             None => {
-                log::warn!(
-                    "file \"{}\" does not have AFL's input file name format",
-                    file_name
-                )
+                if file_name != "README.txt" {
+                    graph.add_node(&MutationGraphNode::new_with_metadata(
+                        &file_name.to_string(),
+                        false,
+                        &file_path,
+                    ))
+                } else {
+                    log::warn!(
+                        "file \"{}\" does not have AFL's input file name format",
+                        file_name
+                    )
+                }
             }
         }
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod test {
+    use crate::seed_tree::parser::afl::{parse_afl_input_directory, AFLExtensions};
+    use crate::seed_tree::sha1_string::Sha1String;
+    use crate::seed_tree::MutationGraph;
+    use std::collections::HashSet;
+    use std::iter::FromIterator;
+    use std::path::Path;
+
+    #[test]
+    fn test_afl_seed_tree_parser() {
+        let mut graph = MutationGraph::new();
+        assert!(parse_afl_input_directory(
+            "test/sample/seed-tree/afl-aurora-crash-exploration/",
+            &mut graph,
+            &AFLExtensions {
+                aurora: true,
+                crash_inputs_dir: Some(
+                    Path::new("test/sample/seed-tree/afl-aurora-crash-exploration/crashes/")
+                        .to_path_buf()
+                )
+            }
+        )
+        .is_ok());
+
+        macro_rules! node {
+            ( $x:expr ) => {
+                &Sha1String::from($x)
+            };
+        }
+
+        assert_eq!(
+            graph.roots(),
+            HashSet::from_iter([node!("crash-40fc056ab481fe4adb78715ea20a0fa486c81ec9")])
+        );
+        assert_eq!(
+            graph.leaves(),
+            HashSet::from_iter([
+                node!("000004"),
+                node!("000005"),
+                node!("000006"),
+                node!("000008"),
+                node!("000009"),
+                node!("000010"),
+                node!("000011"),
+                node!("000012"),
+                node!("000013"),
+                node!("000014"),
+                node!("nc-143"),
+                node!("nc-228"),
+                node!("nc-298"),
+                node!("nc-348"),
+            ])
+        );
+    }
 }
