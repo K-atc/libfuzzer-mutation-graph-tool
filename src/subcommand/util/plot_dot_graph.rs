@@ -22,5 +22,8 @@ pub(crate) fn plot_dot_graph(dot_graph_text: &String, format: &'static str, orig
     }
 
     let _ = child.wait_with_output().expect("Failed to read stdout");
-    log::info!("Rendered to file \"{}\"", path_to_render.display());
+    log::info!(
+        "Rendered seed tree to file \"{}\"",
+        path_to_render.display()
+    );
 }

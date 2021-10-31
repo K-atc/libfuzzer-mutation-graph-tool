@@ -1,3 +1,4 @@
+use std::ffi::OsStr;
 use super::error::ParseError;
 use super::result::Result;
 use crate::seed_tree::mutation_graph_edge::MutationGraphEdge;
@@ -58,9 +59,9 @@ fn visit_directory(
     log::trace!("Scanning directory {:?}", directory);
 
     let one_line_info = Regex::new(if extensions.aurora() {
-        "^id:([^:]+),(?:sig:\\d+,)?(src|orig):([^:]+)(,op:([^_]+)(_(\\S+))?)?$"
+        "^id:([^:]+)(?:,sig:\\d+)?,(src|orig):([^:]+)(?:,op:([^_]+)(_(\\S+))?)?$"
     } else {
-        "^id:([^:]+),(?:sig:\\d+,)?(src|orig):([^:]+)(,op:(\\S+))?$"
+        "^id:([^:]+)(?:,sig:\\d+)?(?:,time:\\d+)?,(src|orig):([^:]+)(?:,time:\\d+)?(?:,op:(\\S+))?$"
     })
     .map_err(ParseError::RegexError)?;
 
@@ -69,8 +70,12 @@ fn visit_directory(
 
         // Recursively iterate directory
         if file_path.is_dir() {
-            visit_directory(file_path, graph, extensions);
-            continue;
+            if file_path.file_name() == Some(OsStr::new(".state")) {
+                log::warn!("Skipped directory {:?}", file_path);
+            } else {
+                visit_directory(file_path, graph, extensions)?;
+                continue;
+            }
         }
 
         let file_name = match file_path.file_name() {
@@ -89,14 +94,18 @@ fn visit_directory(
                 let id = match captures.get(1) {
                     Some(id) => {
                         if extensions.aurora() {
-                            match captures.get(7) {
+                            match captures.get(6) {
                                 Some(non_crash_id) => {
                                     format!("nc-{}", non_crash_id.as_str())
                                 }
                                 None => id.as_str().to_string(),
                             }
                         } else {
-                            id.as_str().to_string()
+                            if is_crash_input_node {
+                                format!("crash-{}", id.as_str())
+                            } else {
+                                id.as_str().to_string()
+                            }
                         }
                     }
                     None => {
@@ -121,7 +130,7 @@ fn visit_directory(
                         ))
                     }
                 };
-                let op = match captures.get(5) {
+                let op = match captures.get(4) {
                     Some(op) => op.as_str(),
                     None => "origin",
                 };
@@ -136,17 +145,24 @@ fn visit_directory(
                 }
             }
             None => {
-                if file_name != "README.txt" {
-                    graph.add_node(&MutationGraphNode::new_with_metadata(
-                        &file_name.to_string(),
-                        false,
-                        &file_path,
-                    ))
-                } else {
+                if file_name.starts_with("id:") {
                     log::warn!(
                         "file \"{}\" does not have AFL's input file name format",
                         file_name
                     )
+                } else {
+                    if file_name == "README.txt" {
+                        log::info!(
+                        "README file \"{}\" found. Skip",
+                        file_name
+                    )
+                    } else {
+                        graph.add_node(&MutationGraphNode::new_with_metadata(
+                            &file_name.to_string(),
+                            false,
+                            &file_path,
+                        ))
+                    }
                 }
             }
         }
