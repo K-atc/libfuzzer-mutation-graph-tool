@@ -1,6 +1,6 @@
 use crate::seed_tree::plot_options::plot_option::PlotOption;
 use crate::seed_tree::plot_options::PlotOptions;
-use crate::seed_tree::sha1_string::Sha1String;
+use crate::seed_tree::node_name::NodeName;
 use crate::seed_tree::MutationGraph;
 use binary_diff::{BinaryDiff, BinaryDiffAnalyzer, BinaryDiffChunk};
 use clap::ArgMatches;
@@ -18,10 +18,10 @@ pub(crate) fn origin(
     graph: MutationGraph,
     minimized_crash_input: Option<PathBuf>,
 ) {
-    let node = match matches.value_of("SHA1") {
-        Some(v) => Sha1String::from(v),
+    let node = match matches.value_of("NODE_NAME") {
+        Some(v) => NodeName::from(v),
         None => {
-            eprintln!("[!] SHA1 is not specified");
+            eprintln!("[!] NODE_NAME is not specified");
             return;
         }
     };
@@ -36,10 +36,10 @@ pub(crate) fn origin(
     match graph.self_and_its_predecessors_of(&node) {
         Ok(predecessors) => {
             if predecessors.len() > 1 {
-                let seeds: Vec<Sha1String> = predecessors
+                let seeds: Vec<NodeName> = predecessors
                     .iter()
                     .filter(|name| seeds_dir.join(&name).exists())
-                    .map(|v| Sha1String::from(v.clone()))
+                    .map(|v| NodeName::from(v.clone()))
                     .collect();
 
                 let node_file_size =
@@ -114,7 +114,7 @@ type Offset = usize;
 struct Origin {
     of_offset: Offset,
     depth: usize,
-    node: Sha1String,
+    node: NodeName,
     position: Offset,
     chunk: BinaryDiffChunk,
 }
@@ -189,7 +189,7 @@ fn calculate_deleted_offsets<R: Read + Seek>(
         .fold(HashSet::new(), |acc, v| acc.union(&v).cloned().collect())
 }
 
-fn find_origin_of(offset: usize, seeds_dir: &Path, seeds: &Vec<Sha1String>) -> Option<Origin> {
+fn find_origin_of(offset: usize, seeds_dir: &Path, seeds: &Vec<NodeName>) -> Option<Origin> {
     let mut target_offset = offset;
     for (i, (name_1, name_2)) in seeds[0..seeds.len() - 1]
         .iter()
@@ -235,7 +235,7 @@ fn find_origin_of(offset: usize, seeds_dir: &Path, seeds: &Vec<Sha1String>) -> O
 #[cfg(test)]
 mod tests {
     use crate::seed_tree::parser::libfuzzer::parse_libfuzzer_mutation_graph_file;
-    use crate::seed_tree::sha1_string::Sha1String;
+    use crate::seed_tree::node_name::NodeName;
     use crate::subcommand::libfuzzer::origin::{calculate_deleted_offsets, find_origin_of};
     use std::collections::HashSet;
     use std::fs::File;
@@ -278,19 +278,19 @@ mod tests {
         ))
         .unwrap();
         let seeds = graph
-            .self_and_its_predecessors_of(&Sha1String::from(
+            .self_and_its_predecessors_of(&NodeName::from(
                 "c298122410da09836c59484e995c287294c31394",
             ))
             .unwrap()
             .iter()
             .filter(|name| seeds_dir.join(&name).exists())
-            .map(|v| Sha1String::from(v.clone()))
+            .map(|v| NodeName::from(v.clone()))
             .collect();
 
         // On far node from target node
         assert_eq!(
             find_origin_of(0x14, seeds_dir, &seeds).unwrap().node,
-            Sha1String::from("99878cf124782dc6d21f079bb29e0dba54606bbb")
+            NodeName::from("99878cf124782dc6d21f079bb29e0dba54606bbb")
         );
         assert_eq!(
             find_origin_of(0x14, seeds_dir, &seeds).unwrap().position,
@@ -312,7 +312,7 @@ mod tests {
         // On in front of target node
         assert_eq!(
             find_origin_of(0x15, seeds_dir, &seeds).unwrap().node,
-            Sha1String::from("76e46ec1efcdcb854486037defc3e777a62524ed")
+            NodeName::from("76e46ec1efcdcb854486037defc3e777a62524ed")
         );
         assert_eq!(
             find_origin_of(0x15, seeds_dir, &seeds).unwrap().position,
@@ -334,7 +334,7 @@ mod tests {
         // On target node
         assert_eq!(
             find_origin_of(0x1a, seeds_dir, &seeds).unwrap().node,
-            Sha1String::from("c298122410da09836c59484e995c287294c31394")
+            NodeName::from("c298122410da09836c59484e995c287294c31394")
         );
         assert_eq!(
             find_origin_of(0x1a, seeds_dir, &seeds).unwrap().position,

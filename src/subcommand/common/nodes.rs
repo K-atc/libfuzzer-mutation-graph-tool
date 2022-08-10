@@ -17,7 +17,7 @@ pub(crate) fn nodes(matches: &ArgMatches, graph: &MutationGraph) {
     };
     for node in graph.nodes() {
         match print_option {
-            PrintOption::PrintNodeName => println!("{}", node.sha1),
+            PrintOption::PrintNodeName => println!("{}", node.name),
             PrintOption::PrintMetadata => println!("{:?}", node),
             PrintOption::PrintFilePath => println!("{}", node.file.display()),
         }

@@ -1,7 +1,7 @@
-use crate::seed_tree::sha1_string::Sha1String;
+use crate::seed_tree::node_name::NodeName;
 use std::collections::HashSet;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum PlotOptionError {
-    MultiplePredecessorsNotSupported(HashSet<Sha1String>),
+    MultiplePredecessorsNotSupported(HashSet<NodeName>),
 }

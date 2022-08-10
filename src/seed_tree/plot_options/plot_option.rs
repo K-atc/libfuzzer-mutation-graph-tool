@@ -1,14 +1,14 @@
 use crate::seed_tree::mutation_graph_edge::MutationGraphEdge;
-use crate::seed_tree::sha1_string::Sha1String;
+use crate::seed_tree::node_name::NodeName;
 
 type Label = String;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum PlotOption {
-    HighlightEdgesFromRootTo(Sha1String),
+    HighlightEdgesFromRootTo(NodeName),
     HighlightEdgeWithBlue(MutationGraphEdge),
     HighlightEdgeWithRed(MutationGraphEdge),
     HighlightEdgeWithGreen(MutationGraphEdge),
     HighlightCrashInput,
-    NotateTo(Sha1String, Label),
+    NotateTo(NodeName, Label),
 }

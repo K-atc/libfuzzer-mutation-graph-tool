@@ -1,5 +1,5 @@
 use crate::seed_tree::error::MutationGraphError;
-use crate::seed_tree::sha1_string::Sha1String;
+use crate::seed_tree::node_name::NodeName;
 use crate::seed_tree::MutationGraph;
 use clap::ArgMatches;
 use std::cmp::Reverse;
@@ -23,7 +23,7 @@ pub(crate) fn max_rank(matches: &ArgMatches, graph: &MutationGraph) {
         Ok(v) => v,
         Err(why) => panic!("Failed to get nodes at max rank: {:?}", why),
     };
-    let heap: BinaryHeap<Reverse<&&Sha1String>> =
+    let heap: BinaryHeap<Reverse<&&NodeName>> =
         max_rank_nodes.iter().map(|v| Reverse(v)).collect();
     for name in heap.into_iter_sorted() {
         match print_option {
@@ -36,7 +36,7 @@ pub(crate) fn max_rank(matches: &ArgMatches, graph: &MutationGraph) {
     }
 }
 
-fn get_max_rank_nodes(graph: &MutationGraph) -> Result<HashSet<&Sha1String>, MutationGraphError> {
+fn get_max_rank_nodes(graph: &MutationGraph) -> Result<HashSet<&NodeName>, MutationGraphError> {
     let mut max_rank = 0;
     let mut max_rank_nodes = HashSet::new();
     for leaf in graph.leaves() {

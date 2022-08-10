@@ -1,10 +1,10 @@
-use super::sha1_string::Sha1String;
+use super::node_name::NodeName;
 use std::cmp::Ordering;
 
 #[derive(Debug, Clone, Hash)]
 pub struct MutationGraphEdge {
-    pub parent: Sha1String,
-    pub child: Sha1String,
+    pub parent: NodeName,
+    pub child: NodeName,
     pub label: String,
 }
 

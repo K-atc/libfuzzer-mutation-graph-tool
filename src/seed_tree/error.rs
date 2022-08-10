@@ -1,8 +1,8 @@
-use crate::seed_tree::sha1_string::Sha1String;
+use crate::seed_tree::node_name::NodeName;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum MutationGraphError {
-    NodeNotExists(Sha1String),
+    NodeNotExists(NodeName),
     FmtError(std::fmt::Error),
     // IoError, // NOTE: std::io::Error does not satisfies PartialEq
 }

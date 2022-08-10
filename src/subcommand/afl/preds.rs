@@ -29,7 +29,7 @@ pub(crate) fn preds(matches: &ArgMatches, graph: &MutationGraph) {
             for node in nodes {
                 let node = graph.get_node(node).unwrap();
                 match print_option {
-                    PrintOption::PrintNodeName => println!("{}", node.sha1),
+                    PrintOption::PrintNodeName => println!("{}", node.name),
                     PrintOption::PrintMetadata => println!("{:?}", node),
                     PrintOption::PrintFilePath => println!("{}", node.file.display()),
                 }

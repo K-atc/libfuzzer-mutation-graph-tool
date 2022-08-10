@@ -174,7 +174,7 @@ fn visit_directory(
 #[cfg(test)]
 mod test {
     use crate::seed_tree::parser::afl::{parse_afl_input_directory, AFLExtensions};
-    use crate::seed_tree::sha1_string::Sha1String;
+    use crate::seed_tree::node_name::NodeName;
     use crate::seed_tree::MutationGraph;
     use std::collections::HashSet;
     use std::iter::FromIterator;
@@ -198,7 +198,7 @@ mod test {
 
         macro_rules! node {
             ( $x:expr ) => {
-                &Sha1String::from($x)
+                &NodeName::from($x)
             };
         }
 

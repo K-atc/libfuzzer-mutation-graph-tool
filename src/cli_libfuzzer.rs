@@ -54,8 +54,8 @@ fn main() {
                         .takes_value(true),
                 )
                 .arg(
-                    Arg::with_name("SHA1")
-                        .help("SHA1 (a node name; i.e. seed file name)")
+                    Arg::with_name("NODE_NAME")
+                        .help("NODE_NAME (a node name; i.e. seed file name)")
                         .required(true)
                         .index(1),
                 )
@@ -63,23 +63,23 @@ fn main() {
         .subcommand(SubCommand::with_name("plot").about(
             "Plot mutation graph file and save as PNG, SVG.\nThis command requires graphviz.",
         ).arg(
-            Arg::with_name("SHA1")
-                .help("Highlight edges from root to SHA1")
+            Arg::with_name("NODE_NAME")
+                .help("Highlight edges from root to NODE_NAME")
                 .index(1),
         ))
         .subcommand(
             SubCommand::with_name("deriv")
-                .about("Analyze derivation of OFFSET of SHA1")
+                .about("Analyze derivation of OFFSET of NODE_NAME")
                 .arg(
-                    Arg::with_name("SHA1")
-                        .help("SHA1 (a node name; i.e. seed file name)")
+                    Arg::with_name("NODE_NAME")
+                        .help("NODE_NAME (a node name; i.e. seed file name)")
                         .required(true)
                         .takes_value(true)
                         .index(1),
                 )
                 .arg(
                     Arg::with_name("OFFSET")
-                        .help("Offset of SHA1")
+                        .help("Offset of NODE_NAME")
                         .required(true)
                         .takes_value(true)
                         .index(2),
@@ -100,7 +100,7 @@ fn main() {
         )
         .subcommand(
             SubCommand::with_name("origin")
-                .about("Find origin seeds on each offset of SHA1")
+                .about("Find origin seeds on each offset of NODE_NAME")
                 .arg(
                     Arg::with_name("SEEDS_DIR")
                         .help("Seed files location")
@@ -109,8 +109,8 @@ fn main() {
                         .index(1),
                 )
                 .arg(
-                    Arg::with_name("SHA1")
-                        .help("SHA1 (a node name; i.e. seed file name)")
+                    Arg::with_name("NODE_NAME")
+                        .help("NODE_NAME (a node name; i.e. seed file name)")
                         .required(true)
                         .takes_value(true)
                         .index(2),

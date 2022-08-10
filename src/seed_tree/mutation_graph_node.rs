@@ -1,17 +1,17 @@
-use super::sha1_string::Sha1String;
+use super::node_name::NodeName;
 use std::cmp::Ordering;
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone, Hash, Default)]
 pub struct MutationGraphNode {
-    pub sha1: Sha1String,
+    pub name: NodeName,
     pub crashed: bool,
     pub file: PathBuf,
 }
 
 impl PartialEq for MutationGraphNode {
     fn eq(&self, other: &Self) -> bool {
-        self.sha1 == other.sha1
+        self.name == other.name
     }
 }
 
@@ -19,7 +19,7 @@ impl Eq for MutationGraphNode {}
 
 impl Ord for MutationGraphNode {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.sha1.cmp(&other.sha1)
+        self.name.cmp(&other.name)
     }
 }
 
@@ -30,16 +30,16 @@ impl PartialOrd for MutationGraphNode {
 }
 
 impl MutationGraphNode {
-    pub fn new(sha1: &Sha1String) -> Self {
+    pub fn new(sha1: &NodeName) -> Self {
         Self {
-            sha1: sha1.clone(),
+            name: sha1.clone(),
             ..Default::default()
         }
     }
 
-    pub fn new_with_metadata(sha1: &Sha1String, crashed: bool, file: &Path) -> Self {
+    pub fn new_with_metadata(sha1: &NodeName, crashed: bool, file: &Path) -> Self {
         Self {
-            sha1: sha1.clone(),
+            name: sha1.clone(),
             crashed,
             file: file.to_path_buf(),
         }

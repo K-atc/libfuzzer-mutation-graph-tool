@@ -1,4 +1,4 @@
-use crate::seed_tree::sha1_string::Sha1String;
+use crate::seed_tree::node_name::NodeName;
 use crate::seed_tree::MutationGraph;
 use binary_diff::{BinaryDiff, BinaryDiffChunk};
 use clap::ArgMatches;
@@ -6,10 +6,10 @@ use std::io::BufReader;
 use std::path::Path;
 
 pub(crate) fn pred(matches: &ArgMatches, graph: MutationGraph) {
-    let node = match matches.value_of("SHA1") {
+    let node = match matches.value_of("NODE_NAME") {
         Some(node) => node.to_string(),
         None => {
-            eprintln!("[!] SHA1 is not specified");
+            eprintln!("[!] NODE_NAME is not specified");
             return;
         }
     };
@@ -28,15 +28,15 @@ pub(crate) fn pred(matches: &ArgMatches, graph: MutationGraph) {
                 };
                 log::info!("seeds_dir = {:?}", seeds_dir);
                 if let Some(seeds_dir) = seeds_dir {
-                    let seeds: Vec<Sha1String> = predecessors
+                    let seeds: Vec<NodeName> = predecessors
                         .iter()
                         .filter(|name| seeds_dir.join(&name).exists())
-                        .map(|v| Sha1String::from(v.clone()))
+                        .map(|v| NodeName::from(v.clone()))
                         .collect();
                     log::info!("seeds = {:?}", seeds);
 
                     if seeds.len() < 2 {
-                        eprintln!("[!] None of predecessors of given SHA1 does not exist in given path: SHA1={}, SEEDS_DIR={}", &node, seeds_dir.display());
+                        eprintln!("[!] None of predecessors of given NODE_NAME does not exist in given path: NODE_NAME={}, SEEDS_DIR={}", &node, seeds_dir.display());
                         return;
                     }
 

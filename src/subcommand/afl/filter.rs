@@ -1,7 +1,7 @@
 use crate::seed_tree::error::MutationGraphError;
 use crate::seed_tree::plot_options::plot_option::PlotOption;
 use crate::seed_tree::plot_options::PlotOptions;
-use crate::seed_tree::sha1_string::Sha1String;
+use crate::seed_tree::node_name::NodeName;
 use crate::seed_tree::MutationGraph;
 use clap::ArgMatches;
 use std::collections::HashSet;
@@ -15,7 +15,7 @@ enum PrintOption {
 
 pub(crate) fn filter(matches: &ArgMatches, graph: &MutationGraph, plot_options: &[PlotOption]) {
     let predecessors = match matches.value_of("PRED_ID") {
-        Some(node) => Some(Sha1String::from(node)),
+        Some(node) => Some(NodeName::from(node)),
         None => None,
     };
     log::info!("predecessors = {:?}", predecessors);
@@ -58,7 +58,7 @@ pub(crate) fn filter(matches: &ArgMatches, graph: &MutationGraph, plot_options: 
 
 fn do_filter(
     graph: &MutationGraph,
-    predecessors: Option<Sha1String>,
+    predecessors: Option<NodeName>,
     leaves: bool,
 ) -> Result<MutationGraph, MutationGraphError> {
     let base_nodes = if let Some(node) = predecessors {

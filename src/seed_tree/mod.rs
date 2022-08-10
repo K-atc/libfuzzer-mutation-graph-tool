@@ -5,7 +5,7 @@ pub mod mutation_graph_node;
 pub mod parser;
 pub mod plot_options;
 pub mod result;
-pub mod sha1_string;
+pub mod node_name;
 
 use directed_edge::DirectedEdge;
 use error::MutationGraphError;
@@ -13,7 +13,7 @@ use mutation_graph_edge::MutationGraphEdge;
 use mutation_graph_node::MutationGraphNode;
 use plot_options::PlotOptions;
 use result::Result;
-use sha1_string::Sha1String;
+use node_name::NodeName;
 use std::collections::hash_map::Values;
 use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::fmt::Write;
@@ -22,13 +22,13 @@ use std::iter::FromIterator;
 #[derive(Debug, Clone)]
 pub struct MutationGraph {
     // Stores real data
-    node: HashMap<Sha1String, MutationGraphNode>,
+    node: HashMap<NodeName, MutationGraphNode>,
     edge: HashMap<DirectedEdge, MutationGraphEdge>,
     weak_edge: HashMap<DirectedEdge, MutationGraphEdge>,
 
     // Indexes to search nodes
-    children: HashMap<Sha1String, HashSet<Sha1String>>,
-    parent: HashMap<Sha1String, Sha1String>,
+    children: HashMap<NodeName, HashSet<NodeName>>,
+    parent: HashMap<NodeName, NodeName>,
 }
 
 impl MutationGraph {
@@ -42,7 +42,7 @@ impl MutationGraph {
         }
     }
 
-    pub fn nodes(&self) -> Values<Sha1String, MutationGraphNode> {
+    pub fn nodes(&self) -> Values<NodeName, MutationGraphNode> {
         self.node.values()
     }
 
@@ -52,10 +52,10 @@ impl MutationGraph {
 
     pub fn add_node(&mut self, node: &MutationGraphNode) -> () {
         // NOTE: *Last* inserted node overwhelms existing node when nodes with same name are inserted
-        self.node.insert(node.sha1.clone(), node.clone());
-        if !self.children.contains_key(&node.sha1) {
+        self.node.insert(node.name.clone(), node.clone());
+        if !self.children.contains_key(&node.name) {
             // Initialize children on first time
-            self.children.insert(node.sha1.clone(), HashSet::new());
+            self.children.insert(node.name.clone(), HashSet::new());
         }
     }
 
@@ -95,7 +95,7 @@ impl MutationGraph {
             .insert(DirectedEdge::from(&edge), edge.clone());
     }
 
-    pub fn get_node(&self, sha1: &Sha1String) -> Option<&MutationGraphNode> {
+    pub fn get_node(&self, sha1: &NodeName) -> Option<&MutationGraphNode> {
         self.node.get(sha1)
     }
 
@@ -103,15 +103,15 @@ impl MutationGraph {
         self.edge.get(arrow)
     }
 
-    pub fn children_of(&self, parent: &Sha1String) -> Option<&HashSet<Sha1String>> {
+    pub fn children_of(&self, parent: &NodeName) -> Option<&HashSet<NodeName>> {
         self.children.get(parent)
     }
 
-    pub fn parent_of(&self, child: &Sha1String) -> Option<&Sha1String> {
+    pub fn parent_of(&self, child: &NodeName) -> Option<&NodeName> {
         self.parent.get(child)
     }
 
-    pub fn root_of<'a>(&'a self, node: &'a Sha1String) -> Result<&'a Sha1String> {
+    pub fn root_of<'a>(&'a self, node: &'a NodeName) -> Result<&'a NodeName> {
         if self.get_node(node).is_none() {
             return Err(MutationGraphError::NodeNotExists(node.clone()));
         }
@@ -121,18 +121,18 @@ impl MutationGraph {
         }
     }
 
-    fn __rank_of(&self, node: &Sha1String, rank: usize) -> Result<usize> {
+    fn __rank_of(&self, node: &NodeName, rank: usize) -> Result<usize> {
         match self.parent_of(node) {
             Some(parent) => self.__rank_of(parent, rank + 1),
             None => Ok(rank), // If given node is root, then rank is 0.
         }
     }
 
-    pub fn rank_of(&self, node: &Sha1String) -> Result<usize> {
+    pub fn rank_of(&self, node: &NodeName) -> Result<usize> {
         self.__rank_of(node, 0)
     }
 
-    pub fn predecessors_of(&self, node: &Sha1String) -> Result<Vec<&Sha1String>> {
+    pub fn predecessors_of(&self, node: &NodeName) -> Result<Vec<&NodeName>> {
         if self.get_node(node).is_none() {
             return Err(MutationGraphError::NodeNotExists(node.clone()));
         }
@@ -148,16 +148,16 @@ impl MutationGraph {
         }
     }
 
-    pub fn self_and_its_predecessors_of(&self, node: &Sha1String) -> Result<Vec<&Sha1String>> {
+    pub fn self_and_its_predecessors_of(&self, node: &NodeName) -> Result<Vec<&NodeName>> {
         let mut res = self.predecessors_of(node)?;
         match self.get_node(node) {
-            Some(node) => res.push(&node.sha1),
+            Some(node) => res.push(&node.name),
             None => return Err(MutationGraphError::NodeNotExists(node.clone())),
         }
         Ok(res)
     }
 
-    pub fn leaves(&self) -> HashSet<&Sha1String> {
+    pub fn leaves(&self) -> HashSet<&NodeName> {
         self.children
             .iter()
             .filter(|(_, v)| v.len() == 0)
@@ -165,7 +165,7 @@ impl MutationGraph {
             .collect()
     }
 
-    pub fn roots(&self) -> HashSet<&Sha1String> {
+    pub fn roots(&self) -> HashSet<&NodeName> {
         self.node
             .keys()
             .filter(|v| self.parent_of(v).is_none())
@@ -200,7 +200,7 @@ impl MutationGraph {
         for node in node_heap.into_iter_sorted() {
             let mut additional = String::new();
             if let Some(ref target) = plot_options.highlight_edges_from_root_to {
-                if &node.sha1 == target {
+                if &node.name == target {
                     write!(&mut additional, "color=\"crimson\"")
                         .map_err(MutationGraphError::FmtError)?;
                 }
@@ -211,7 +211,7 @@ impl MutationGraph {
                         .map_err(MutationGraphError::FmtError)?;
                 }
             }
-            write!(&mut res, "\"{}\" [{}]\n", node.sha1, additional)
+            write!(&mut res, "\"{}\" [{}]\n", node.name, additional)
                 .map_err(MutationGraphError::FmtError)?;
         }
 
@@ -278,11 +278,11 @@ mod test {
     use crate::seed_tree::error::MutationGraphError;
     use crate::seed_tree::mutation_graph_edge::MutationGraphEdge;
     use crate::seed_tree::mutation_graph_node::MutationGraphNode;
-    use crate::seed_tree::sha1_string::Sha1String;
+    use crate::seed_tree::node_name::NodeName;
     use crate::seed_tree::MutationGraph;
 
     impl MutationGraphEdge {
-        pub fn new(parent: &Sha1String, child: &Sha1String) -> Self {
+        pub fn new(parent: &NodeName, child: &NodeName) -> Self {
             Self {
                 parent: parent.clone(),
                 child: child.clone(),
@@ -293,8 +293,8 @@ mod test {
 
     #[test]
     fn test_mutation_graph_node() {
-        let node_1_sha1 = Sha1String::from("node_1");
-        let no_such_node_sha1 = Sha1String::from("no_such_node");
+        let node_1_sha1 = NodeName::from("node_1");
+        let no_such_node_sha1 = NodeName::from("no_such_node");
 
         let mut graph = MutationGraph::new();
 
@@ -307,12 +307,12 @@ mod test {
 
     #[test]
     fn test_mutation_graph_edge() {
-        let node_1_sha1 = Sha1String::from("node_1");
-        let node_2_sha1 = Sha1String::from("node_2");
-        let node_3_sha1 = Sha1String::from("node_3");
-        let node_4_sha1 = Sha1String::from("node_4");
-        let node_5_sha1 = Sha1String::from("node_5");
-        let no_such_node_sha1 = Sha1String::from("no_such_node");
+        let node_1_sha1 = NodeName::from("node_1");
+        let node_2_sha1 = NodeName::from("node_2");
+        let node_3_sha1 = NodeName::from("node_3");
+        let node_4_sha1 = NodeName::from("node_4");
+        let node_5_sha1 = NodeName::from("node_5");
+        let no_such_node_sha1 = NodeName::from("no_such_node");
 
         let mut graph = MutationGraph::new();
         /*
@@ -365,9 +365,9 @@ mod test {
 
     #[test]
     fn test_mutation_graph_missing_explicit_node_decl() {
-        let node_1_sha1 = Sha1String::from("node_1");
-        let node_2_sha1 = Sha1String::from("node_2");
-        let node_3_sha1 = Sha1String::from("node_3");
+        let node_1_sha1 = NodeName::from("node_1");
+        let node_2_sha1 = NodeName::from("node_2");
+        let node_3_sha1 = NodeName::from("node_3");
 
         let mut graph = MutationGraph::new();
         /*
@@ -381,8 +381,8 @@ mod test {
         assert_eq!(
             graph
                 .nodes()
-                .map(|v| &v.sha1)
-                .collect::<HashSet<&Sha1String>>(),
+                .map(|v| &v.name)
+                .collect::<HashSet<&NodeName>>(),
             HashSet::from_iter([&node_1_sha1, &node_2_sha1, &node_3_sha1])
         );
 
@@ -396,9 +396,9 @@ mod test {
 
     #[test]
     fn test_mutation_graph_cycle_graph() {
-        let node_1_sha1 = Sha1String::from("node_1");
-        let node_2_sha1 = Sha1String::from("node_2");
-        let node_3_sha1 = Sha1String::from("node_3");
+        let node_1_sha1 = NodeName::from("node_1");
+        let node_2_sha1 = NodeName::from("node_2");
+        let node_3_sha1 = NodeName::from("node_3");
 
         let mut graph = MutationGraph::new();
         /*

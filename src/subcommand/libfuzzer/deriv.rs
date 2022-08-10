@@ -2,7 +2,7 @@ use crate::seed_tree::directed_edge::DirectedEdge;
 use crate::seed_tree::mutation_graph_edge::MutationGraphEdge;
 use crate::seed_tree::plot_options::plot_option::PlotOption;
 use crate::seed_tree::plot_options::PlotOptions;
-use crate::seed_tree::sha1_string::Sha1String;
+use crate::seed_tree::node_name::NodeName;
 use crate::seed_tree::MutationGraph;
 use binary_diff::{BinaryDiff, BinaryDiffAnalyzer, BinaryDiffChunk};
 use clap::ArgMatches;
@@ -10,10 +10,10 @@ use std::io::BufReader;
 use std::path::Path;
 
 pub(crate) fn deriv(matches: &ArgMatches, mut graph: MutationGraph) {
-    let node = match matches.value_of("SHA1") {
+    let node = match matches.value_of("NODE_NAME") {
         Some(v) => v.to_string(),
         None => {
-            eprintln!("[!] SHA1 is not specified");
+            eprintln!("[!] NODE_NAME is not specified");
             return;
         }
     };
@@ -30,14 +30,14 @@ pub(crate) fn deriv(matches: &ArgMatches, mut graph: MutationGraph) {
             if predecessors.len() > 0 {
                 if let Some(seeds_dir_string) = matches.value_of("SEEDS_DIR") {
                     let seeds_dir = Path::new(seeds_dir_string);
-                    let seeds: Vec<Sha1String> = predecessors
+                    let seeds: Vec<NodeName> = predecessors
                         .iter()
                         .filter(|name| seeds_dir.join(&name).exists())
-                        .map(|v| Sha1String::from(v.clone()))
+                        .map(|v| NodeName::from(v.clone()))
                         .collect();
 
                     if seeds.len() < 2 {
-                        eprintln!("[!] None of predecessors of given SHA1 does not exist in given path: SHA1={}, SEEDS_DIR={}", &node, seeds_dir_string);
+                        eprintln!("[!] None of predecessors of given NODE_NAME does not exist in given path: NODE_NAME={}, SEEDS_DIR={}", &node, seeds_dir_string);
                     }
 
                     let mut plot_option: Vec<PlotOption> = vec![];
@@ -78,7 +78,7 @@ pub(crate) fn deriv(matches: &ArgMatches, mut graph: MutationGraph) {
                                             let edge = MutationGraphEdge {
                                                 parent: name_1.clone(),
                                                 child: name_2.clone(),
-                                                label: Sha1String::new(),
+                                                label: NodeName::new(),
                                             };
                                             graph.add_weak_edge(&edge);
                                             edge

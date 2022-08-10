@@ -8,19 +8,19 @@ pub mod result;
 
 use crate::seed_tree::mutation_graph_edge::MutationGraphEdge;
 use crate::seed_tree::plot_options::error::PlotOptionError;
-use crate::seed_tree::sha1_string::Sha1String;
+use crate::seed_tree::node_name::NodeName;
 use result::Result;
 
 type Label = String;
 
 #[derive(Debug, Eq, PartialEq, Default)]
 pub struct PlotOptions {
-    pub highlight_edges_from_root_to: Option<Sha1String>,
+    pub highlight_edges_from_root_to: Option<NodeName>,
     pub highlight_edge_with_blue: HashSet<MutationGraphEdge>,
     pub highlight_edge_with_red: HashSet<MutationGraphEdge>,
     pub highlight_edge_with_green: HashSet<MutationGraphEdge>,
     pub highlight_crash_input: bool,
-    pub notate: HashMap<Sha1String, Label>,
+    pub notate: HashMap<NodeName, Label>,
 }
 
 impl PlotOptions {
@@ -33,7 +33,7 @@ impl PlotOptions {
     pub fn from(options: &[PlotOption]) -> Result<Self> {
         Ok(Self {
             highlight_edges_from_root_to: {
-                let mut nodes: HashSet<Sha1String> = HashSet::new();
+                let mut nodes: HashSet<NodeName> = HashSet::new();
                 for option in options.iter() {
                     match option {
                         PlotOption::HighlightEdgesFromRootTo(ref v) => {
@@ -90,7 +90,7 @@ impl PlotOptions {
             },
             highlight_crash_input: options.contains(&PlotOption::HighlightCrashInput),
             notate: {
-                let mut notes: HashMap<Sha1String, Label> = HashMap::new();
+                let mut notes: HashMap<NodeName, Label> = HashMap::new();
                 for option in options.iter() {
                     match option {
                         PlotOption::NotateTo(ref node, ref label) => {
@@ -116,7 +116,7 @@ mod tests {
     use crate::seed_tree::plot_options::error::PlotOptionError;
     use crate::seed_tree::plot_options::plot_option::PlotOption;
     use crate::seed_tree::plot_options::PlotOptions;
-    use crate::seed_tree::sha1_string::Sha1String;
+    use crate::seed_tree::node_name::NodeName;
     use std::collections::HashSet;
     use std::iter::FromIterator;
 
@@ -128,7 +128,7 @@ mod tests {
 
     #[test]
     fn test_plot_options_highlight_predecessors_of_one_node() {
-        let sha1_1 = Sha1String::from("1");
+        let sha1_1 = NodeName::from("1");
         let options = PlotOptions::from(&[PlotOption::HighlightEdgesFromRootTo(sha1_1.clone())]);
         assert_eq!(
             options,
@@ -141,8 +141,8 @@ mod tests {
 
     #[test]
     fn test_plot_options_highlight_predecessors_of_multiple_nodes() {
-        let sha1_1 = Sha1String::from("1");
-        let sha1_2 = Sha1String::from("2");
+        let sha1_1 = NodeName::from("1");
+        let sha1_2 = NodeName::from("2");
         let options = PlotOptions::from(&[
             PlotOption::HighlightEdgesFromRootTo(sha1_1.clone()),
             PlotOption::HighlightEdgesFromRootTo(sha1_2.clone()),

@@ -34,11 +34,11 @@ ARGS:
     <FILE>    A mutation graph file.
 
 SUBCOMMANDS:
-    deriv     Analyze derivation of OFFSET of SHA1
+    deriv     Analyze derivation of OFFSET of NODE_NAME
     help      Prints this message or the help of the given subcommand(s)
     leaves    List leaf nodes.
     ls        List nodes.
-    origin    Find origin seeds on each offset of SHA1
+    origin    Find origin seeds on each offset of NODE_NAME
     parse     Just parse mutation graph file.
     plot      Plot mutation graph file and save as PNG, SVG.
               This command requires graphviz.
