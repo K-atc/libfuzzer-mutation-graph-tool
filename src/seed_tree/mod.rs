@@ -64,11 +64,15 @@ impl MutationGraph {
             // Initialize children on first time
             self.children.insert(node.name.clone(), HashSet::new());
         }
-        if let Some(collision_node) = self.file_hash.insert(node.hash.clone(), node.name.clone()) {
-            warn!(
-                "Inserted node collides with node name={:?}: node={:?}",
-                collision_node, node
-            );
+        if !node.hash.is_empty() {
+            if let Some(collision_node) =
+                self.file_hash.insert(node.hash.clone(), node.name.clone())
+            {
+                warn!(
+                    "Inserted node collides with node name={:?}: node={:?}",
+                    collision_node, node
+                );
+            }
         }
     }
 

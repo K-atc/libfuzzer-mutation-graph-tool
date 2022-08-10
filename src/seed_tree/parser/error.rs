@@ -22,3 +22,9 @@ impl From<io::Error> for ParseError {
         Self::IoError(error)
     }
 }
+
+impl From<regex::Error> for ParseError {
+    fn from(error: regex::Error) -> Self {
+        Self::RegexError(error)
+    }
+}

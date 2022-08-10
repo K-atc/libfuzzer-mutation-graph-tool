@@ -33,7 +33,7 @@ fn main() {
         .about("A Tool to interact with AFL's seed tree described in inputs file name.")
         .arg(
             Arg::with_name("INPUT_DIR")
-                .help("Directories contains AFL's input files.")
+                .help("Directories contains AFL's input files (NOT crash file).")
                 .required(false)
                 .index(1)
                 .multiple(true),
@@ -199,7 +199,8 @@ fn main() {
     };
     log::info!("Extensions: {:?}", extensions);
     let graph = if input_dirs.len() > 0 {
-        parse_afl_input_directories(input_dirs, &extensions).unwrap()
+        parse_afl_input_directories(input_dirs, &extensions)
+            .expect("Failed to parse input directories")
     } else {
         parse_generic_seed_tree_file(std::io::stdin()).unwrap()
     };

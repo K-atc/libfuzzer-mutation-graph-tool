@@ -64,11 +64,10 @@ fn visit_directory(
         "^id:([^:]+)(?:,sig:\\d+)?,(src|orig):([^:]+)(?:,op:([^_]+)(_(\\S+))?)?$"
     } else {
         "^id:([^:]+)(?:,sig:\\d+)?(?:,time:\\d+)?,(src|orig):([^:]+)(?:,time:\\d+)?(?:,op:(\\S+))?$"
-    })
-    .map_err(ParseError::RegexError)?;
+    })?;
 
-    for entry in directory.read_dir().map_err(ParseError::IoError)? {
-        let file_path = entry.map_err(ParseError::IoError)?.path();
+    for entry in directory.read_dir()? {
+        let file_path = entry?.path();
 
         // Recursively iterate directory
         if file_path.is_dir() {
@@ -76,8 +75,8 @@ fn visit_directory(
                 log::warn!("Skipped directory {:?}", file_path);
             } else {
                 visit_directory(file_path, graph, extensions)?;
-                continue;
             }
+            continue;
         }
 
         let file_name = match file_path.file_name() {
