@@ -1,10 +1,12 @@
-use std::ffi::OsStr;
 use super::error::ParseError;
 use super::result::Result;
 use crate::seed_tree::mutation_graph_edge::MutationGraphEdge;
 use crate::seed_tree::mutation_graph_node::MutationGraphNode;
+use crate::seed_tree::util::calc_file_hash;
 use crate::seed_tree::MutationGraph;
+
 use regex::Regex;
+use std::ffi::OsStr;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -119,6 +121,7 @@ fn visit_directory(
                     &id.to_string(),
                     is_crash_input_node,
                     file_path.as_path(),
+                    &calc_file_hash(file_path.as_path())?,
                 ));
 
                 let src_list = match captures.get(3) {
@@ -152,15 +155,13 @@ fn visit_directory(
                     )
                 } else {
                     if file_name == "README.txt" {
-                        log::info!(
-                        "README file \"{}\" found. Skip",
-                        file_name
-                    )
+                        log::info!("README file \"{}\" found. Skip", file_name)
                     } else {
                         graph.add_node(&MutationGraphNode::new_with_metadata(
                             &file_name.to_string(),
                             false,
                             &file_path,
+                            &calc_file_hash(file_path.as_path())?,
                         ))
                     }
                 }
@@ -173,8 +174,8 @@ fn visit_directory(
 
 #[cfg(test)]
 mod test {
-    use crate::seed_tree::parser::afl::{parse_afl_input_directory, AFLExtensions};
     use crate::seed_tree::node_name::NodeName;
+    use crate::seed_tree::parser::afl::{parse_afl_input_directory, AFLExtensions};
     use crate::seed_tree::MutationGraph;
     use std::collections::HashSet;
     use std::iter::FromIterator;

@@ -1,19 +1,24 @@
 pub mod directed_edge;
 pub mod error;
+pub mod file_hash;
 pub mod mutation_graph_edge;
 pub mod mutation_graph_node;
+pub mod node_name;
 pub mod parser;
 pub mod plot_options;
 pub mod result;
-pub mod node_name;
+pub mod util;
 
-use directed_edge::DirectedEdge;
-use error::MutationGraphError;
-use mutation_graph_edge::MutationGraphEdge;
-use mutation_graph_node::MutationGraphNode;
-use plot_options::PlotOptions;
-use result::Result;
-use node_name::NodeName;
+use self::directed_edge::DirectedEdge;
+use self::error::MutationGraphError;
+use self::file_hash::FileHash;
+use self::mutation_graph_edge::MutationGraphEdge;
+use self::mutation_graph_node::MutationGraphNode;
+use self::node_name::NodeName;
+use self::plot_options::PlotOptions;
+use self::result::Result;
+
+use log::warn;
 use std::collections::hash_map::Values;
 use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::fmt::Write;
@@ -29,6 +34,7 @@ pub struct MutationGraph {
     // Indexes to search nodes
     children: HashMap<NodeName, HashSet<NodeName>>,
     parent: HashMap<NodeName, NodeName>,
+    file_hash: HashMap<FileHash, NodeName>,
 }
 
 impl MutationGraph {
@@ -39,6 +45,7 @@ impl MutationGraph {
             weak_edge: HashMap::new(),
             children: HashMap::new(),
             parent: HashMap::new(),
+            file_hash: HashMap::new(),
         }
     }
 
@@ -56,6 +63,12 @@ impl MutationGraph {
         if !self.children.contains_key(&node.name) {
             // Initialize children on first time
             self.children.insert(node.name.clone(), HashSet::new());
+        }
+        if let Some(collision_node) = self.file_hash.insert(node.hash.clone(), node.name.clone()) {
+            warn!(
+                "Inserted node collides with node name={:?}: node={:?}",
+                collision_node, node
+            );
         }
     }
 
@@ -170,6 +183,13 @@ impl MutationGraph {
             .keys()
             .filter(|v| self.parent_of(v).is_none())
             .collect()
+    }
+
+    pub fn lookup_by_file_hash(&self, file_hash: &FileHash) -> Result<&NodeName> {
+        match self.file_hash.get(file_hash) {
+            Some(node_name) => Ok(node_name),
+            None => Err(MutationGraphError::FileHashNotExists(file_hash.clone())),
+        }
     }
 
     // Dumps self to dot graph

@@ -1,6 +1,6 @@
+use crate::seed_tree::node_name::NodeName;
 use crate::seed_tree::plot_options::plot_option::PlotOption;
 use crate::seed_tree::plot_options::PlotOptions;
-use crate::seed_tree::node_name::NodeName;
 use crate::seed_tree::MutationGraph;
 use crate::subcommand::util::plot_dot_graph::plot_dot_graph;
 use clap::ArgMatches;
@@ -25,9 +25,9 @@ pub(crate) fn plot(matches: &ArgMatches, graph: MutationGraph, base_plot_options
         .expect("Failed to generate dot file");
 
     File::create(seed_tree_file_name)
-    .unwrap()
-    .write_all(dot_graph_text.as_bytes())
-    .unwrap();
+        .unwrap()
+        .write_all(dot_graph_text.as_bytes())
+        .unwrap();
     log::info!(
         "Rendered seed tree to file \"{}\"",
         seed_tree_file_name.display()

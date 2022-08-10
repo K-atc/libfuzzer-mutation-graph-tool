@@ -16,6 +16,7 @@ path = "src/cli_afl.rs"
 required-features = ["afl"]
 
 [features]
+default = ["afl"]
 libfuzzer = []
 afl = []
 
@@ -30,6 +31,10 @@ clap = "2.33.3"
 regex = "1.5.4"
 binary-diff = { version = "^0", git = "https://github.com/K-atc/binary-diff-rs.git" }
 #binary-diff = { version = "^0", path = "../binary-diff-rs" }
+
+### Hasher
+sha-1 = "0.10.0"
+base16ct = { version = "0.1.1", features = ["alloc"] }
 
 [dev-dependencies]
 cargo-husky = { version = "1", features = ["precommit-hook", "run-cargo-fmt"] }

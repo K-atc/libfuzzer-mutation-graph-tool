@@ -1,6 +1,6 @@
+use crate::seed_tree::node_name::NodeName;
 use crate::seed_tree::plot_options::plot_option::PlotOption;
 use crate::seed_tree::plot_options::PlotOptions;
-use crate::seed_tree::node_name::NodeName;
 use crate::seed_tree::MutationGraph;
 use binary_diff::{BinaryDiff, BinaryDiffAnalyzer, BinaryDiffChunk};
 use clap::ArgMatches;
@@ -234,8 +234,8 @@ fn find_origin_of(offset: usize, seeds_dir: &Path, seeds: &Vec<NodeName>) -> Opt
 
 #[cfg(test)]
 mod tests {
-    use crate::seed_tree::parser::libfuzzer::parse_libfuzzer_mutation_graph_file;
     use crate::seed_tree::node_name::NodeName;
+    use crate::seed_tree::parser::libfuzzer::parse_libfuzzer_mutation_graph_file;
     use crate::subcommand::libfuzzer::origin::{calculate_deleted_offsets, find_origin_of};
     use std::collections::HashSet;
     use std::fs::File;

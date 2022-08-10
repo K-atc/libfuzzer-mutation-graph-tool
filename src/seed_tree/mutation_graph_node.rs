@@ -1,3 +1,4 @@
+use super::file_hash::FileHash;
 use super::node_name::NodeName;
 use std::cmp::Ordering;
 use std::path::{Path, PathBuf};
@@ -7,6 +8,7 @@ pub struct MutationGraphNode {
     pub name: NodeName,
     pub crashed: bool,
     pub file: PathBuf,
+    pub hash: FileHash,
 }
 
 impl PartialEq for MutationGraphNode {
@@ -30,18 +32,19 @@ impl PartialOrd for MutationGraphNode {
 }
 
 impl MutationGraphNode {
-    pub fn new(sha1: &NodeName) -> Self {
+    pub fn new(name: &NodeName) -> Self {
         Self {
-            name: sha1.clone(),
+            name: name.clone(),
             ..Default::default()
         }
     }
 
-    pub fn new_with_metadata(sha1: &NodeName, crashed: bool, file: &Path) -> Self {
+    pub fn new_with_metadata(name: &NodeName, crashed: bool, file: &Path, hash: &FileHash) -> Self {
         Self {
-            name: sha1.clone(),
+            name: name.clone(),
             crashed,
             file: file.to_path_buf(),
+            hash: hash.clone(),
         }
     }
 }

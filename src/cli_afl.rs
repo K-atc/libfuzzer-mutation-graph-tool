@@ -3,9 +3,11 @@
 pub mod seed_tree;
 pub mod subcommand;
 
+extern crate base16ct;
 extern crate clap;
 extern crate log;
 extern crate regex;
+extern crate sha1;
 
 use crate::seed_tree::parser::afl::{parse_afl_input_directories, AFLExtensions};
 use crate::seed_tree::parser::generic::parse_generic_seed_tree_file;
@@ -141,7 +143,7 @@ fn main() {
         )
         .subcommand(
             SubCommand::with_name("preds")
-                .about("List predecessors of given ID and ID")
+                .about("List predecessors of given ID and ID. Default of ID is node number")
                 .arg(
                     Arg::with_name("ID")
                         .required(true)
@@ -159,6 +161,12 @@ fn main() {
                         .takes_value(false)
                         .help("Print file path of matched nodes. This option cannot be enabled with --meta")
                 )
+                .arg(
+                    Arg::with_name("hash")
+                        .long("hash")
+                        .takes_value(false)
+                        .help("ID is meant to be sha1 hash of file")
+                )
         )
         .get_matches();
 
@@ -174,6 +182,11 @@ fn main() {
         }
         None => None,
     };
+
+    if matches.subcommand_name().is_none() {
+        eprintln!("[!] No subcommand specified. Exit");
+        return;
+    }
 
     if input_dirs.len() == 0 {
         log::info!("Reading seed tree from stdin")

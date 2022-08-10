@@ -1,8 +1,8 @@
 use crate::seed_tree::directed_edge::DirectedEdge;
 use crate::seed_tree::mutation_graph_edge::MutationGraphEdge;
+use crate::seed_tree::node_name::NodeName;
 use crate::seed_tree::plot_options::plot_option::PlotOption;
 use crate::seed_tree::plot_options::PlotOptions;
-use crate::seed_tree::node_name::NodeName;
 use crate::seed_tree::MutationGraph;
 use binary_diff::{BinaryDiff, BinaryDiffAnalyzer, BinaryDiffChunk};
 use clap::ArgMatches;

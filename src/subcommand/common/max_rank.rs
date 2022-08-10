@@ -23,8 +23,7 @@ pub(crate) fn max_rank(matches: &ArgMatches, graph: &MutationGraph) {
         Ok(v) => v,
         Err(why) => panic!("Failed to get nodes at max rank: {:?}", why),
     };
-    let heap: BinaryHeap<Reverse<&&NodeName>> =
-        max_rank_nodes.iter().map(|v| Reverse(v)).collect();
+    let heap: BinaryHeap<Reverse<&&NodeName>> = max_rank_nodes.iter().map(|v| Reverse(v)).collect();
     for name in heap.into_iter_sorted() {
         match print_option {
             PrintOption::PrintNodeName => println!("{}", name.0),

@@ -7,8 +7,8 @@ pub mod plot_option;
 pub mod result;
 
 use crate::seed_tree::mutation_graph_edge::MutationGraphEdge;
-use crate::seed_tree::plot_options::error::PlotOptionError;
 use crate::seed_tree::node_name::NodeName;
+use crate::seed_tree::plot_options::error::PlotOptionError;
 use result::Result;
 
 type Label = String;
@@ -113,10 +113,10 @@ impl PlotOptions {
 
 #[cfg(test)]
 mod tests {
+    use crate::seed_tree::node_name::NodeName;
     use crate::seed_tree::plot_options::error::PlotOptionError;
     use crate::seed_tree::plot_options::plot_option::PlotOption;
     use crate::seed_tree::plot_options::PlotOptions;
-    use crate::seed_tree::node_name::NodeName;
     use std::collections::HashSet;
     use std::iter::FromIterator;
 

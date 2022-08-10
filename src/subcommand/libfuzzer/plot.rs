@@ -1,6 +1,6 @@
+use crate::seed_tree::node_name::NodeName;
 use crate::seed_tree::plot_options::plot_option::PlotOption;
 use crate::seed_tree::plot_options::PlotOptions;
-use crate::seed_tree::node_name::NodeName;
 use crate::seed_tree::MutationGraph;
 use crate::subcommand::util::plot_dot_graph::plot_dot_graph;
 use clap::ArgMatches;

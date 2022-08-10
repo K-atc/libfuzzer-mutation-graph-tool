@@ -8,11 +8,21 @@ enum PrintOption {
 }
 
 pub(crate) fn preds(matches: &ArgMatches, graph: &MutationGraph) {
-    let node = match matches.value_of("ID") {
-        Some(node) => node.to_string(),
-        None => {
-            eprintln!("[!] ID is not specified");
-            return;
+    let node_name = {
+        let id = match matches.value_of("ID") {
+            Some(node) => node.to_string(),
+            None => {
+                eprintln!("[!] ID is not specified");
+                return;
+            }
+        };
+        if matches.is_present("hash") {
+            graph
+                .lookup_by_file_hash(&id)
+                .expect("Failed to translate given ID to node name")
+                .clone()
+        } else {
+            id
         }
     };
 
@@ -24,7 +34,7 @@ pub(crate) fn preds(matches: &ArgMatches, graph: &MutationGraph) {
         PrintOption::PrintNodeName
     };
 
-    match graph.self_and_its_predecessors_of(&node) {
+    match graph.self_and_its_predecessors_of(&node_name) {
         Ok(nodes) => {
             for node in nodes {
                 let node = graph.get_node(node).unwrap();
@@ -35,6 +45,6 @@ pub(crate) fn preds(matches: &ArgMatches, graph: &MutationGraph) {
                 }
             }
         }
-        Err(why) => eprintln!("[!] Node {} does not exists: {:?}", node, why),
+        Err(why) => eprintln!("[!] Node name={} does not exists: {:?}", node_name, why),
     }
 }

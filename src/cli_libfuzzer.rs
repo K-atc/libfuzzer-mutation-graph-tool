@@ -3,10 +3,12 @@
 pub mod seed_tree;
 pub mod subcommand;
 
+extern crate base16ct;
 extern crate binary_diff;
 extern crate clap;
 extern crate log;
 extern crate regex;
+extern crate sha1;
 
 use clap::{App, Arg, SubCommand};
 use std::path::Path;

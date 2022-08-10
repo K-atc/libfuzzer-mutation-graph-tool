@@ -1,7 +1,7 @@
 use crate::seed_tree::error::MutationGraphError;
+use crate::seed_tree::node_name::NodeName;
 use crate::seed_tree::plot_options::plot_option::PlotOption;
 use crate::seed_tree::plot_options::PlotOptions;
-use crate::seed_tree::node_name::NodeName;
 use crate::seed_tree::MutationGraph;
 use clap::ArgMatches;
 use std::collections::HashSet;

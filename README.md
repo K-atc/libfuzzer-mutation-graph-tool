@@ -169,3 +169,8 @@ dd0d17f2261fa314c23cd3ab442f3e4b1279e5ca -> 76e46ec1efcdcb854486037defc3e777a625
 How to run `seed-tree-analyzer-afl`
 ----
 TODO
+
+### List predecessors of a node with given file hash
+```
+$ cargo run -q --bin seed-tree-analyzer-afl --features afl -- 
+```
