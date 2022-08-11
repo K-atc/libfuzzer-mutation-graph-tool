@@ -9,6 +9,15 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::path::Path;
 
+pub fn assert_path_exists<P: AsRef<Path>>(path: P) -> P {
+    assert!(
+        path.as_ref().exists(),
+        "Path does not exists: {:?}",
+        path.as_ref()
+    );
+    path
+}
+
 pub fn calc_file_hash<P: AsRef<Path>>(path: P) -> Result<FileHash, io::Error> {
     // trace!("calc_file_hash: path={:?}", path.as_ref());
     let mut file = BufReader::new(fs::File::open(path)?);

@@ -1,4 +1,9 @@
-use crate::seed_tree::MutationGraph;
+use std::fs;
+use std::fs::File;
+use std::io::Write;
+use std::path::PathBuf;
+
+use crate::seed_tree::{util::assert_path_exists, MutationGraph};
 use clap::ArgMatches;
 
 enum PrintOption {
@@ -26,6 +31,19 @@ pub(crate) fn preds(matches: &ArgMatches, graph: &MutationGraph) {
         }
     };
 
+    let export_dir = matches.value_of("export");
+    let mut export_original_file = match export_dir {
+        Some(export_dir) => {
+            assert_path_exists(export_dir);
+            let export_original_file = PathBuf::from(export_dir).join("original_file.txt");
+            Some(
+                File::create(&export_original_file)
+                    .expect(format!("Failed to create file: {:?}", &export_original_file).as_str()),
+            )
+        }
+        None => None,
+    };
+
     let print_option = if matches.is_present("meta") {
         PrintOption::PrintMetadata
     } else if matches.is_present("file") {
@@ -42,6 +60,27 @@ pub(crate) fn preds(matches: &ArgMatches, graph: &MutationGraph) {
                     PrintOption::PrintNodeName => println!("{}", node.name),
                     PrintOption::PrintMetadata => println!("{:?}", node),
                     PrintOption::PrintFilePath => println!("{}", node.file.display()),
+                }
+                if !node.file.as_os_str().is_empty() {
+                    if let Some(ref export_dir) = export_dir {
+                        let copy_to = PathBuf::from(export_dir).join(&node.name);
+                        fs::copy(/* from */ &node.file, /* to */ &copy_to).expect(
+                            format!(
+                                "Failed to copy file: from={:?}, to={:?}",
+                                node.file, copy_to
+                            )
+                            .as_str(),
+                        );
+                        if let Some(ref mut export_original_file) = export_original_file {
+                            write!(
+                                export_original_file,
+                                "{} {}\n",
+                                node.hash,
+                                node.file.display()
+                            )
+                            .expect("Failed to write");
+                        }
+                    }
                 }
             }
         }

@@ -13,6 +13,7 @@ use crate::seed_tree::parser::afl::{parse_afl_input_directories, AFLExtensions};
 use crate::seed_tree::parser::generic::parse_generic_seed_tree_file;
 use crate::seed_tree::plot_options::plot_option::PlotOption;
 use crate::seed_tree::plot_options::PlotOptions;
+use crate::seed_tree::util::assert_path_exists;
 use crate::subcommand::afl::filter::filter;
 use crate::subcommand::afl::plot::plot;
 use crate::subcommand::afl::preds::preds;
@@ -21,6 +22,7 @@ use crate::subcommand::common::leaves::leaves;
 use crate::subcommand::common::max_rank::max_rank;
 use crate::subcommand::common::nodes::nodes;
 use crate::subcommand::common::roots::roots;
+
 use clap::{App, Arg, SubCommand};
 use std::collections::HashSet;
 use std::path::Path;
@@ -168,6 +170,12 @@ fn main() {
                         .takes_value(false)
                         .help("ID is meant to be sha1 hash of file")
                 )
+                .arg(
+                    Arg::with_name("export")
+                        .long("export")
+                        .takes_value(true)
+                        .help("Copy input files to given directory")
+                )
         )
         .get_matches();
 
@@ -178,7 +186,7 @@ fn main() {
 
     // NOTE: `&str` is no problem. `parse_afl_input_directories()` converts to Path
     let mut input_dirs: HashSet<&str> = match matches.values_of("INPUT_DIR") {
-        Some(input_dirs) => input_dirs.collect(),
+        Some(input_dirs) => input_dirs.map(|path| assert_path_exists(path)).collect(),
         None => HashSet::new(),
     };
 
@@ -189,7 +197,7 @@ fn main() {
 
     let crash_inputs_dir = match matches.value_of("CRASH_INPUT_DIR") {
         Some(crash_inputs_dir) => {
-            input_dirs.insert(crash_inputs_dir);
+            input_dirs.insert(assert_path_exists(crash_inputs_dir));
             Some(Path::new(crash_inputs_dir).to_path_buf())
         }
         None => None,
