@@ -6,6 +6,7 @@ use crate::seed_tree::util::calc_file_hash;
 use crate::seed_tree::MutationGraph;
 
 use regex::Regex;
+use std::collections::HashSet;
 use std::ffi::OsStr;
 use std::path::Path;
 use std::path::PathBuf;
@@ -27,7 +28,7 @@ impl AFLExtensions {
 }
 
 pub fn parse_afl_input_directories<T: AsRef<Path>>(
-    directories: Vec<T>,
+    directories: HashSet<T>,
     extensions: &AFLExtensions,
 ) -> Result<MutationGraph> {
     let mut res = MutationGraph::new();
@@ -79,15 +80,15 @@ fn visit_directory(
             continue;
         }
 
+        // log::trace!("parsing file name: {}", file_name);
         let file_name = match file_path.file_name() {
             Some(file_name) => file_name.to_str().ok_or(ParseError::StringEncoding)?,
             None => return Err(ParseError::UnexpectedFilePath(file_path)),
         };
-        // log::trace!("parsing file name: {}", file_name);
 
         let is_crash_input_node = match extensions.crash_inputs_dir {
-            Some(ref crash_input_dir) => file_path.starts_with(crash_input_dir),
-            None => false,
+            Some(ref crash_input_dir) => &directory == crash_input_dir,
+            None => directory.ends_with("crashes"),
         };
 
         match one_line_info.captures(file_name) {

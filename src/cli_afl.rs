@@ -22,6 +22,7 @@ use crate::subcommand::common::max_rank::max_rank;
 use crate::subcommand::common::nodes::nodes;
 use crate::subcommand::common::roots::roots;
 use clap::{App, Arg, SubCommand};
+use std::collections::HashSet;
 use std::path::Path;
 
 fn main() {
@@ -41,7 +42,7 @@ fn main() {
         .arg(
             Arg::with_name("CRASH_INPUT_DIR")
                 .long("crash")
-                .help("Enable crash exploration extension. Treat CRASH_INPUT_DIR as a directory contains crash inputs. These are highlighted in the seed tree.")
+                .help("Treat CRASH_INPUT_DIR as a directory contains crash inputs. These are highlighted in the seed tree. Default is a directory named \"crashes\" treated as crash input directory")
                 .takes_value(true),
         )
         .arg(
@@ -170,34 +171,36 @@ fn main() {
         )
         .get_matches();
 
-    // NOTE: `&str` is no problem. `parse_afl_input_directories()` converts to Path
-    let mut input_dirs: Vec<&str> = match matches.values_of("INPUT_DIR") {
-        Some(input_dirs) => input_dirs.collect(),
-        None => Vec::new(),
-    };
-    let crash_inputs_dir = match matches.value_of("CRASH_INPUT_DIR") {
-        Some(crash_inputs_dir) => {
-            input_dirs.push(crash_inputs_dir);
-            Some(Path::new(crash_inputs_dir).to_path_buf())
-        }
-        None => None,
-    };
-
     if matches.subcommand_name().is_none() {
         eprintln!("[!] No subcommand specified. Exit");
         return;
     }
 
+    // NOTE: `&str` is no problem. `parse_afl_input_directories()` converts to Path
+    let mut input_dirs: HashSet<&str> = match matches.values_of("INPUT_DIR") {
+        Some(input_dirs) => input_dirs.collect(),
+        None => HashSet::new(),
+    };
+
     if input_dirs.len() == 0 {
         log::info!("Reading seed tree from stdin")
     }
-
     log::info!("input_dirs = {:?}", input_dirs);
+
+    let crash_inputs_dir = match matches.value_of("CRASH_INPUT_DIR") {
+        Some(crash_inputs_dir) => {
+            input_dirs.insert(crash_inputs_dir);
+            Some(Path::new(crash_inputs_dir).to_path_buf())
+        }
+        None => None,
+    };
+
     let extensions = AFLExtensions {
         aurora: matches.is_present("ENABLE_AURORA"),
         crash_inputs_dir,
     };
     log::info!("Extensions: {:?}", extensions);
+
     let graph = if input_dirs.len() > 0 {
         parse_afl_input_directories(input_dirs, &extensions)
             .expect("Failed to parse input directories")

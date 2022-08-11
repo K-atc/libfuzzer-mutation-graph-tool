@@ -172,5 +172,13 @@ TODO
 
 ### List predecessors of a node with given file hash
 ```
-$ cargo run -q --bin seed-tree-analyzer-afl --features afl -- 
+$ seed-tree-analyzer-afl ./findings/ preds --hash 3a54435a70b7390ac4edfba3c274f36f9afb8d61 --meta
+MutationGraphNode { name: "not_kitty_icc.png", crashed: false, file: "", hash: "" }
+MutationGraphNode { name: "000003", crashed: false, file: "./findings/queue/id:000003,orig:not_kitty_icc.png", hash: "641af7f3bf9a7531b34fb27b6ce3de791c6a8f60" }
+MutationGraphNode { name: "000221", crashed: false, file: "./findings/queue/id:000221,src:000003,op:flip1,pos:34,+cov", hash: "00156d140a3f0f6de68057f46337610c275f307e" }
+MutationGraphNode { name: "001092", crashed: false, file: "./findings/queue/id:001092,src:000221+000780,op:splice,rep:128,+cov", hash: "5145f15bbdf4cb45eeffa61d89ae48b92a1ee475" }
+MutationGraphNode { name: "001094", crashed: false, file: "./findings/queue/id:001094,src:001092,op:arith8,pos:37,val:+17,+cov", hash: "1b7cbf8dc43f380d8091d6c74ba05dbe5316716a" }
+MutationGraphNode { name: "001096", crashed: false, file: "./findings/queue/id:001096,src:001094,op:int32,pos:33,val:+0,+cov", hash: "3a0f83cd8c2c51c5fc837111cf32ae047a518068" }
+MutationGraphNode { name: "001239", crashed: false, file: "./findings/queue/id:001239,src:001096+000171,op:splice,rep:16,+cov", hash: "70a34b49b7a637642868e4b0b9a646efd70f95eb" }
+MutationGraphNode { name: "crash-000066", crashed: true, file: "./findings/crashes/id:000066,sig:11,src:001239+000892,op:splice,rep:32", hash: "3a54435a70b7390ac4edfba3c274f36f9afb8d61" }
 ```

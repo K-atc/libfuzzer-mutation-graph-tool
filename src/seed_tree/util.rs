@@ -10,7 +10,7 @@ use std::io::BufReader;
 use std::path::Path;
 
 pub fn calc_file_hash<P: AsRef<Path>>(path: P) -> Result<FileHash, io::Error> {
-    trace!("calc_file_hash: path={:?}", path.as_ref());
+    // trace!("calc_file_hash: path={:?}", path.as_ref());
     let mut file = BufReader::new(fs::File::open(path)?);
     let buf = file.fill_buf()?;
     let hash = Sha1::digest(buf);
