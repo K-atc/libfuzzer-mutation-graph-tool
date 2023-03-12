@@ -62,7 +62,8 @@ fn visit_directory(
     log::trace!("Scanning directory {:?}", directory);
 
     let one_line_info = Regex::new(if extensions.aurora() {
-        "^id:([^:]+)(?:,sig:\\d+)?,(src|orig):([^:]+)(?:,op:([^_]+)(_(\\S+))?)?$"
+        "^id:([^:]+)(?:,sig:\\d+)?,(?:src|orig):([^:]+)(?:,op:([^_]+)(?:_(\\S+))?)?$"
+        //   ~~~~~~~1                           ~~~~~~~2      ~~~~~~~3 ~~~~~~4
     } else {
         "^id:([^:]+)(?:,sig:\\d+)?(?:,time:\\d+)?,(?:src|orig):([^:]+)(?:,time:\\d+)?(?:,execs:\\d+)?(?:,op:(\\S+))?$"
         //   ~~~~~~~1                                          ~~~~~~~2                                      ~~~~~3
@@ -97,7 +98,7 @@ fn visit_directory(
                 let id = match captures.get(1) {
                     Some(id) => {
                         if extensions.aurora() {
-                            match captures.get(6) {
+                            match captures.get(4) {
                                 Some(non_crash_id) => {
                                     format!("nc-{}", non_crash_id.as_str())
                                 }
