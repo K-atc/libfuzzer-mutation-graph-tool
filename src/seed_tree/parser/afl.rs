@@ -62,11 +62,11 @@ fn visit_directory(
     log::trace!("Scanning directory {:?}", directory);
 
     let one_line_info = Regex::new(if extensions.aurora() {
-        "^id:([^:]+)(?:,sig:\\d+)?,(?:src|orig):([^:]+)(?:,op:([^_]+)(?:_(\\S+))?)?$"
-        //   ~~~~~~~1                           ~~~~~~~2      ~~~~~~~3 ~~~~~~4
+        "^id:(\\d+)(?:,sig:\\d+)?,(?:src|orig):([^:]+)(?:,op:([^_]+)(?:_(\\S+))?)?$"
+        //   ~~~~~~1                           ~~~~~~~2      ~~~~~~~3 ~~~~~~4
     } else {
-        "^id:([^:]+)(?:,sig:\\d+)?(?:,time:\\d+)?,(?:src|orig):([^:]+)(?:,time:\\d+)?(?:,execs:\\d+)?(?:,op:(\\S+))?$"
-        //   ~~~~~~~1                                          ~~~~~~~2                                      ~~~~~3
+        "^id:(\\d+)(?:,sig:\\d+)?(?:,time:\\d+)?(?:,execs:\\d+)?,(?:src|orig):([^:]+)(?:,time:\\d+)?(?:,execs:\\d+)?(?:,op:(\\S+))?$"
+        //   ~~~~~~1                                                          ~~~~~~~2                                     ~~~~~~3
     })?;
 
     for entry in directory.read_dir()? {
@@ -176,6 +176,7 @@ fn visit_directory(
 
 #[cfg(test)]
 mod test {
+    use crate::seed_tree::mutation_graph_node::MutationGraphNode;
     use crate::seed_tree::node_name::NodeName;
     use crate::seed_tree::parser::afl::{parse_afl_input_directory, AFLExtensions};
     use crate::seed_tree::MutationGraph;
@@ -183,8 +184,59 @@ mod test {
     use std::iter::FromIterator;
     use std::path::Path;
 
+    macro_rules! node {
+        ( $x:expr ) => {
+            &NodeName::from($x)
+        };
+    }
+
     #[test]
-    fn test_afl_seed_tree_parser() {
+    fn test_aflplusplus_seed_tree() {
+        let seed_dir = Path::new("test/sample/seed-tree/aflplusplus-4.05c/");
+
+        let mut graph = MutationGraph::new();
+        assert!(parse_afl_input_directory(
+            seed_dir,
+            &mut graph,
+            &AFLExtensions {
+                aurora: false,
+                crash_inputs_dir: Some(seed_dir.join("crashes/"))
+            }
+        )
+        .is_ok());
+
+        // println!("{:#?}", graph);
+
+        match graph.get_node(&String::from("000000")) {
+            Some(node) => {
+                let expected = MutationGraphNode {
+                    name: String::from("000000"),
+                    crashed: false,
+                    file: seed_dir.join("queue/id:000000,time:0,execs:0,orig:hello.attach-123.pdf"),
+                    hash: String::from("da39a3ee5e6b4b0d3255bfef95601890afd80709"),
+                };
+                assert_eq!(node, &expected);
+                assert_eq!(node.crashed, expected.crashed);
+                assert_eq!(node.file, expected.file);
+                assert_eq!(node.hash, expected.hash);
+            }
+            None => unreachable!(),
+        }
+
+        match graph.get_node(&String::from("crash-000002")) {
+            Some(node) => {
+                let expected = MutationGraphNode { name: String::from("crash-000002"), crashed: true, file: seed_dir.join("crashes/id:000002,sig:06,src:000000,time:8024,execs:2409,op:colorization,pos:0"), hash: String::from("7e240de74fb1ed08fa08d38063f6a6a91462a815") };
+                assert_eq!(node, &expected);
+                assert_eq!(node.crashed, expected.crashed);
+                assert_eq!(node.file, expected.file);
+                assert_eq!(node.hash, expected.hash);
+            }
+            None => unreachable!(),
+        }
+    }
+
+    #[test]
+    fn test_aurora_seed_tree() {
         let mut graph = MutationGraph::new();
         assert!(parse_afl_input_directory(
             "test/sample/seed-tree/afl-aurora-crash-exploration/",
@@ -198,12 +250,6 @@ mod test {
             }
         )
         .is_ok());
-
-        macro_rules! node {
-            ( $x:expr ) => {
-                &NodeName::from($x)
-            };
-        }
 
         assert_eq!(
             graph.roots(),

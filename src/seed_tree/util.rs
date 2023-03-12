@@ -5,7 +5,6 @@ use log::trace;
 use sha1::{Digest, Sha1};
 use std::fs;
 use std::io;
-use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
 use std::path::Path;
@@ -23,7 +22,7 @@ pub fn calc_file_hash<P: AsRef<Path>>(path: P) -> Result<FileHash, io::Error> {
     // trace!("calc_file_hash: path={:?}", path.as_ref());
     let mut file = BufReader::new(fs::File::open(path)?);
     let mut buf = Vec::new();
-    file.read_to_end(&mut buf);
+    file.read_to_end(&mut buf)?;
     let hash = Sha1::digest(buf);
     Ok(base16ct::lower::encode_string(&hash))
 }
