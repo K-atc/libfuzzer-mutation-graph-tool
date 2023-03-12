@@ -7,6 +7,7 @@ use std::fs;
 use std::io;
 use std::io::BufRead;
 use std::io::BufReader;
+use std::io::Read;
 use std::path::Path;
 
 pub fn assert_path_exists<P: AsRef<Path>>(path: P) -> P {
@@ -21,7 +22,8 @@ pub fn assert_path_exists<P: AsRef<Path>>(path: P) -> P {
 pub fn calc_file_hash<P: AsRef<Path>>(path: P) -> Result<FileHash, io::Error> {
     // trace!("calc_file_hash: path={:?}", path.as_ref());
     let mut file = BufReader::new(fs::File::open(path)?);
-    let buf = file.fill_buf()?;
+    let mut buf = Vec::new();
+    file.read_to_end(&mut buf);
     let hash = Sha1::digest(buf);
     Ok(base16ct::lower::encode_string(&hash))
 }

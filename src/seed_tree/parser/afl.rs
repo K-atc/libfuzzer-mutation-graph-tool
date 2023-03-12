@@ -64,7 +64,8 @@ fn visit_directory(
     let one_line_info = Regex::new(if extensions.aurora() {
         "^id:([^:]+)(?:,sig:\\d+)?,(src|orig):([^:]+)(?:,op:([^_]+)(_(\\S+))?)?$"
     } else {
-        "^id:([^:]+)(?:,sig:\\d+)?(?:,time:\\d+)?,(src|orig):([^:]+)(?:,time:\\d+)?(?:,op:(\\S+))?$"
+        "^id:([^:]+)(?:,sig:\\d+)?(?:,time:\\d+)?,(?:src|orig):([^:]+)(?:,time:\\d+)?(?:,execs:\\d+)?(?:,op:(\\S+))?$"
+        //   ~~~~~~~1                                          ~~~~~~~2                                      ~~~~~3
     })?;
 
     for entry in directory.read_dir()? {
@@ -124,7 +125,7 @@ fn visit_directory(
                     &calc_file_hash(file_path.as_path())?,
                 ));
 
-                let src_list = match captures.get(3) {
+                let src_list = match captures.get(2) {
                     Some(src_list) => src_list.as_str().split("+"),
                     None => {
                         return Err(ParseError::SyntaxError(
@@ -133,7 +134,7 @@ fn visit_directory(
                         ))
                     }
                 };
-                let op = match captures.get(4) {
+                let op = match captures.get(3) {
                     Some(op) => op.as_str(),
                     None => "origin",
                 };
