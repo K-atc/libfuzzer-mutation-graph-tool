@@ -5,6 +5,7 @@ use clap::ArgMatches;
 use std::io::BufReader;
 use std::path::Path;
 
+#[allow(unused)]
 pub(crate) fn pred(matches: &ArgMatches, graph: MutationGraph) {
     let node = match matches.value_of("NODE_NAME") {
         Some(node) => node.to_string(),
@@ -31,7 +32,7 @@ pub(crate) fn pred(matches: &ArgMatches, graph: MutationGraph) {
                     let seeds: Vec<NodeName> = predecessors
                         .iter()
                         .filter(|name| seeds_dir.join(&name).exists())
-                        .map(|v| NodeName::from(v.clone()))
+                        .map(|v| NodeName::from(*v))
                         .collect();
                     log::info!("seeds = {:?}", seeds);
 

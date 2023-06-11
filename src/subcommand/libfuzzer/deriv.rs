@@ -9,6 +9,7 @@ use clap::ArgMatches;
 use std::io::BufReader;
 use std::path::Path;
 
+#[allow(unused)]
 pub(crate) fn deriv(matches: &ArgMatches, mut graph: MutationGraph) {
     let node = match matches.value_of("NODE_NAME") {
         Some(v) => v.to_string(),
@@ -30,10 +31,10 @@ pub(crate) fn deriv(matches: &ArgMatches, mut graph: MutationGraph) {
             if predecessors.len() > 0 {
                 if let Some(seeds_dir_string) = matches.value_of("SEEDS_DIR") {
                     let seeds_dir = Path::new(seeds_dir_string);
-                    let seeds: Vec<NodeName> = predecessors
+                    let seeds: Vec<_> = predecessors
                         .iter()
                         .filter(|name| seeds_dir.join(&name).exists())
-                        .map(|v| NodeName::from(v.clone()))
+                        .map(|v| NodeName::from(*v))
                         .collect();
 
                     if seeds.len() < 2 {

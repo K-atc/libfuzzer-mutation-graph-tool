@@ -8,6 +8,7 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 
+#[allow(unused)]
 pub(crate) fn plot(matches: &ArgMatches, graph: MutationGraph, base_plot_options: &[PlotOption]) {
     let mut plot_options = Vec::new();
     plot_options.extend_from_slice(base_plot_options);

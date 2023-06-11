@@ -6,6 +6,7 @@ use crate::subcommand::util::plot_dot_graph::plot_dot_graph;
 use clap::ArgMatches;
 use std::path::Path;
 
+#[allow(unused)]
 pub(crate) fn plot(
     matches: &ArgMatches,
     graph: MutationGraph,

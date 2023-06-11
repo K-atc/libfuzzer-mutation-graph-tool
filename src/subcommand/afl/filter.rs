@@ -7,12 +7,14 @@ use clap::ArgMatches;
 use std::collections::HashSet;
 use std::iter::FromIterator;
 
+#[allow(unused)]
 enum PrintOption {
     PrintDotGraph,
     PrintFilePath,
     PrintMetadata,
 }
 
+#[allow(unused)]
 pub(crate) fn filter(matches: &ArgMatches, graph: &MutationGraph, plot_options: &[PlotOption]) {
     let predecessors = match matches.value_of("PRED_ID") {
         Some(node) => Some(NodeName::from(node)),
@@ -56,6 +58,7 @@ pub(crate) fn filter(matches: &ArgMatches, graph: &MutationGraph, plot_options: 
     }
 }
 
+#[allow(unused)]
 fn do_filter(
     graph: &MutationGraph,
     predecessors: Option<NodeName>,

@@ -1,17 +1,19 @@
+use crate::seed_tree::MutationGraph;
+use clap::ArgMatches;
+use log::info;
 use std::fs;
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 
-use crate::seed_tree::{util::assert_path_exists, MutationGraph};
-use clap::ArgMatches;
-
+#[allow(unused)]
 enum PrintOption {
     PrintNodeName,
     PrintFilePath,
     PrintMetadata,
 }
 
+#[allow(unused)]
 pub(crate) fn preds(matches: &ArgMatches, graph: &MutationGraph) {
     let node_name = {
         let id = match matches.value_of("ID") {
@@ -34,7 +36,10 @@ pub(crate) fn preds(matches: &ArgMatches, graph: &MutationGraph) {
     let export_dir = matches.value_of("export");
     let mut export_original_file = match export_dir {
         Some(export_dir) => {
-            assert_path_exists(export_dir);
+            if !PathBuf::from(export_dir).exists() {
+                info!("Created export directory");
+                fs::create_dir(export_dir);
+            }
             let export_original_file = PathBuf::from(export_dir).join("original_file.txt");
             Some(
                 File::create(&export_original_file)

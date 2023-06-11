@@ -2,6 +2,7 @@ use crate::seed_tree::node_name::NodeName;
 use crate::seed_tree::MutationGraph;
 use clap::ArgMatches;
 
+#[allow(unused)]
 pub(crate) fn children(matches: &ArgMatches, graph: &MutationGraph) {
     let node = match matches.value_of("ID") {
         Some(node) => NodeName::from(node),

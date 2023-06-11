@@ -13,6 +13,7 @@ use std::io::{BufReader, Read, Seek};
 use std::iter::FromIterator;
 use std::path::{Path, PathBuf};
 
+#[allow(unused)]
 pub(crate) fn origin(
     matches: &ArgMatches,
     graph: MutationGraph,
@@ -39,7 +40,7 @@ pub(crate) fn origin(
                 let seeds: Vec<NodeName> = predecessors
                     .iter()
                     .filter(|name| seeds_dir.join(&name).exists())
-                    .map(|v| NodeName::from(v.clone()))
+                    .map(|v| NodeName::from(*v))
                     .collect();
 
                 let node_file_size =

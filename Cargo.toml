@@ -28,6 +28,7 @@ env_logger = "0.8.4"
 ### CLI Interface
 clap = "2.33.3"
 
+### Util
 regex = "1.5.4"
 binary-diff = { version = "^0", git = "https://github.com/K-atc/binary-diff-rs.git" }
 #binary-diff = { version = "^0", path = "../binary-diff-rs" }

@@ -7,6 +7,7 @@ enum PrintOption {
     PrintMetadata,
 }
 
+#[allow(unused)]
 pub(crate) fn nodes(matches: &ArgMatches, graph: &MutationGraph) {
     let print_option = if matches.is_present("meta") {
         PrintOption::PrintMetadata

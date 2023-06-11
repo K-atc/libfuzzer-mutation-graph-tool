@@ -5,12 +5,14 @@ use clap::ArgMatches;
 use std::cmp::Reverse;
 use std::collections::{BinaryHeap, HashSet};
 
+#[allow(unused)]
 enum PrintOption {
     PrintNodeName,
     PrintFilePath,
     PrintMetadata,
 }
 
+#[allow(unused)]
 pub(crate) fn max_rank(matches: &ArgMatches, graph: &MutationGraph) {
     let print_option = if matches.is_present("meta") {
         PrintOption::PrintMetadata
@@ -35,6 +37,7 @@ pub(crate) fn max_rank(matches: &ArgMatches, graph: &MutationGraph) {
     }
 }
 
+#[allow(unused)]
 fn get_max_rank_nodes(graph: &MutationGraph) -> Result<HashSet<&NodeName>, MutationGraphError> {
     let mut max_rank = 0;
     let mut max_rank_nodes = HashSet::new();

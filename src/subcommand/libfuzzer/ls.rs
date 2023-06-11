@@ -3,6 +3,7 @@ use crate::seed_tree::MutationGraph;
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
 
+#[allow(unused)]
 pub(crate) fn ls(graph: MutationGraph) {
     let heap: BinaryHeap<Reverse<&MutationGraphNode>> = graph.nodes().map(|v| Reverse(v)).collect();
     for node in heap.into_iter_sorted() {
